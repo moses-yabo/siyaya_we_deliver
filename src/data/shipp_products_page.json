@@ -1,0 +1,13 @@
+{
+    "shipping_products_section":{
+                
+        "form_title":"Shipp your products with us !",
+        "btn_submit":"shipp",
+        "form_input_place_holders":["Name","departure","destination","N.o passengers"],
+        "trip_type_option":["Local","National","Business","Schools","Funeral"],
+        "gif_url":""
+    
+
+
+}
+}

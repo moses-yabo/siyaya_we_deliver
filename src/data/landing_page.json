@@ -1,0 +1,69 @@
+{
+    "header":
+        {
+            "title":"Book a taxi ",
+            "IconUrl":"",
+            "imageUrl":""
+        },
+
+        "navigation":{
+            "nav_links":["book","shipp","hire","about","contact"],
+            "nav_icon_url":""
+        },
+
+        "hero_section":{
+            "imgu_rl":"",
+            "gif_url":"",
+            "hero_text":""
+
+        },
+
+    "main_section":[
+        {
+            "book_taxi_section":{
+                "section_title":"book a taxi  Siyaya!",
+                "section_submit":"see more !",
+                "section_description":"Name ij'pkpjijhuhhujjdfghjkxfghfffdhjjfgdfhvgfgfgfhgffghhgfdfhhfdfhghfg",
+                "trip_type_options":["Local","National","Business","Schools","Funeral"],
+                "trip_type_images":["","","","",""],
+                "gif_url":""
+            
+
+            },
+            "hire_trailer_section":{
+                
+                "book_taxi_section":{
+                    "section_title":"hire a trailer for your goods!",
+                    "section_btn":"see more !",
+                    "section_description":"Name ij'pkpjijhuhhujjdfghjkxfghfffdhjjfgdfhvgfgfgfhgffghhgfdfhhfdfhghfg",
+                    "trip_type_options":["Local","National","Business","Schools","Funeral"],
+                    "trip_type_images":["","","","",""],
+                    "gif_url":""
+    
+                }
+            },
+            "shipping_products_section":{
+                
+                
+                    "section_title":"Shipp your products with us ! ",
+                    "section_btn":"see more !",
+                    "section_description":"Name ij'pkpjijhuhhujjdfghjkxfghfffdhjjfgdfhvgfgfgfhgffghhgfdfhhfdfhghfg",
+                    "trip_type_options":["Local","National","Business","Schools","Funeral"],
+                    "trip_type_images":["","","","",""],
+                    "gif_url":""
+    
+
+            },
+            "about_section":{
+                    "section_title":" more About Quanter Deliver  ",
+                    "section_submit":"see more !",
+                    "section_description":"Name ifghjkhgjghghghjhjghfhj'pkpjijhuhhujjdfghjkxfghfffdhjjfgdfhvgfgfgfhgffghhgfdfhhfdfhghfg",
+                    "trip_type_options":["Hire / Rent trailers","book taxi local and nationally ","Courier / Ship with us"],
+                    "trip_type_images":["","","","",""],
+                    "gif_url":""
+                
+            }
+    }
+    ]
+    
+}
