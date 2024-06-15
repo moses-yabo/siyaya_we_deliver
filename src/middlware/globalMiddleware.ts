@@ -1,7 +1,7 @@
 import express, { Request, Response, NextFunction } from "express";
 import path from "path";
-import swaggerDocs from '../utils/swaggerDefinition';
-import { ifError } from "assert";
+import swaggerDocumentation from '../utils/swaggerDefinition';
+import swaggerUI from "swagger-ui-express";
 
 
 export class QuanterMiddlewares {
@@ -14,17 +14,24 @@ export class QuanterMiddlewares {
             this.configureMiddleware();
 
     }
-    private getRequestTime() {
+   
+      private configureMiddleware() {
+        this.app.use(express.urlencoded({ extended: false }));
+        this.app.use(express.json());
+        this.app.use(this.getRequestTime());
+         // SWAGGER PAGE
+        this.app.use('/docs', swaggerUI.serve, swaggerUI.setup(swaggerDocumentation));
+        // DOCS IN JSON FORMAT
+        this.app.get("/docs.json", (req: Request, res: Response) => {
+          res.setHeader("Content-Type", "application/json");
+          res.send(swaggerDocumentation);
+        });
+      };
+
+      private getRequestTime() {
         return (req: Request, res: Response, next: NextFunction) => {
           console.log(`the request was at ${Date()}`);
           next();
         };
-      }
-      private configureMiddleware() {
-        this.app.use(express.urlencoded({ extended: false }));
-        this.app.use(express.json());
-        this.app.use(express.static(path.join(__dirname, "../dist/views")));
-        this.app.use(this.getRequestTime());
-        swaggerDocs((<express.Express>this.app), (<number>this.port));
-      }
+      };
 }

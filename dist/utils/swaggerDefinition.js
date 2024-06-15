@@ -1,44 +1,235 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const swagger_jsdoc_1 = __importDefault(require("swagger-jsdoc"));
-const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
-const package_json_1 = require("../package.json");
-const options = {
-    definition: {
-        openapi: '3.0.0',
-        info: {
-            title: 'Quanter  Deliver API',
-            version: package_json_1.version
-        },
-        components: {
-            securitySchemas: {
-                bearerAuth: {
-                    type: "http",
-                    scheme: "bearer",
-                    bearerFormat: "JWT"
+const bookTaxiRoutes_1 = require("./../routes/bookTaxiRoutes");
+const ProductsRoutes_1 = require("../routes/ProductsRoutes");
+const ShippingRoutes_1 = require("../routes/ShippingRoutes");
+const rentTrailerRoutes_1 = require("../routes/rentTrailerRoutes");
+const TaxiRoutes_1 = require("../routes/TaxiRoutes");
+const TrailersRoutes_1 = require("../routes/TrailersRoutes");
+const { version } = require("../package.json");
+const swaggerDocumentation = {
+    openapi: "3.0.0",
+    info: {
+        title: "Quanter Deliver API",
+        version
+    },
+    components: {
+        schemas: {
+            TaxiBooking: {
+                type: "object",
+                properties: {
+                    passengerId: {
+                        type: "string",
+                        description: "Reference to the booking passenger's _id"
+                    },
+                    driverId: {
+                        type: "string",
+                        description: "Reference to the booking driver's _id"
+                    },
+                    pickupLocation: {
+                        type: "string",
+                        description: "The pickup location for the booking"
+                    },
+                    dropoffLocation: {
+                        type: "string",
+                        description: "The dropoff location for the booking"
+                    },
+                    pickupTime: {
+                        type: "string",
+                        format: "date-time",
+                        description: "The pickup time for the booking"
+                    },
+                    fare: {
+                        type: "number",
+                        description: "The fare amount for the booking"
+                    },
+                    tripType: {
+                        type: "string",
+                        enum: ["LOCAL_TRIP", "NATIONAL_TRIP"],
+                        description: "The type of trip for the booking (local or national)"
+                    }
+                }
+            },
+            Products: {
+                type: "object",
+                properties: {
+                    productId: {
+                        type: "string",
+                        description: "Reference to the product's _id"
+                    },
+                    name: {
+                        type: "string",
+                        description: "Name of the product"
+                    },
+                    description: {
+                        type: "string",
+                        description: "Description of the product"
+                    },
+                    price: {
+                        type: "number",
+                        description: "Price of the product"
+                    },
+                    category: {
+                        type: "string",
+                        description: "Category of the product"
+                    }
+                }
+            },
+            Rentals: {
+                type: "object",
+                properties: {
+                    productId: {
+                        type: "string",
+                        description: "Reference to the product's _id"
+                    },
+                    name: {
+                        type: "string",
+                        description: "Name of the product"
+                    },
+                    description: {
+                        type: "string",
+                        description: "Description of the product"
+                    },
+                    price: {
+                        type: "number",
+                        description: "Price of the product"
+                    },
+                    category: {
+                        type: "string",
+                        description: "Category of the product"
+                    }
+                }
+            },
+            Shipping: {
+                type: "object",
+                properties: {
+                    trip_type: {
+                        type: "string",
+                        enum: ["LOCAL_TRIP", "NATIONAL_TRIP"],
+                        description: "Reference to the product's _id"
+                    },
+                    name: {
+                        type: "string",
+                        description: "Name of the product"
+                    },
+                    description: {
+                        type: "string",
+                        description: "Description of the product"
+                    },
+                    price: {
+                        type: "number",
+                        description: "Price of the product"
+                    },
+                    category: {
+                        type: "string",
+                        description: "Category of the product"
+                    }
+                }
+            },
+            Taxi: {
+                type: "object",
+                properties: {
+                    imgUrl: {
+                        type: "string",
+                        oneOf: [
+                            { type: "string" },
+                            { type: "string", format: "binary" }
+                        ],
+                        minlength: 3,
+                        maxlength: 250,
+                        description: "Image of the taxi",
+                        required: [false, "image of the taxi"]
+                    },
+                    description: {
+                        type: "string",
+                        minlength: 8,
+                        maxlength: 250,
+                        description: "Drop off location date is a required field",
+                        required: [true, "Drop off location date is a required field"]
+                    },
+                    capacity: {
+                        type: "string",
+                        description: "Pick up time is a required field",
+                        required: [true, "Pick up time is a required field"]
+                    },
+                    fleet_no: {
+                        type: "string",
+                        minlength: 10,
+                        maxlength: 35,
+                        description: "fare is a required field",
+                        required: [true, "fare is a required field"]
+                    },
+                    isAvailable: {
+                        type: "boolean",
+                        description: "TripType is a required field",
+                        required: [true, "TripType is a required field"]
+                    },
+                    isBooked: {
+                        type: "boolean",
+                        description: "TripType is a required field",
+                        required: [true, "TripType is a required field"]
+                    }
+                }
+            },
+            Trailer: {
+                type: "object",
+                properties: {
+                    imgUrl: {
+                        type: "string",
+                        oneOf: [
+                            { type: "string" },
+                            { type: "string", format: "binary" }
+                        ],
+                        minlength: 3,
+                        maxlength: 250,
+                        description: "Image of the taxi",
+                        required: [false, "image of the taxi"]
+                    },
+                    description: {
+                        type: "string",
+                        minlength: 8,
+                        maxlength: 250,
+                        description: "Drop off location date is a required field",
+                        required: [true, "Drop off location date is a required field"]
+                    },
+                    capacity: {
+                        type: "string",
+                        description: "Pick up time is a required field",
+                        required: [true, "Pick up time is a required field"]
+                    },
+                    fleet_no: {
+                        type: "string",
+                        minlength: 10,
+                        maxlength: 35,
+                        description: "fare is a required field",
+                        required: [true, "fare is a required field"]
+                    },
+                    isAvailable: {
+                        type: "boolean",
+                        description: "TripType is a required field",
+                        required: [true, "TripType is a required field"]
+                    },
+                    isBooked: {
+                        type: "boolean",
+                        description: "TripType is a required field",
+                        required: [true, "TripType is a required field"]
+                    }
                 }
             }
         },
-        security: [
-            {
-                bearerAuth: []
+        securitySchemes: {
+            bearerAuth: {
+                type: "http",
+                scheme: "bearer",
+                bearerFormat: "JWT"
             }
-        ]
+        }
     },
-    apis: ['./routes/*.ts', './models*.ts'], // Specify the path to your route files (replace with actual path)
+    security: [
+        {
+            bearerAuth: []
+        }
+    ],
+    paths: Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({}, bookTaxiRoutes_1.Taxi_booking_routes), ProductsRoutes_1.Products_routes), rentTrailerRoutes_1.Rental_routes), ShippingRoutes_1.shipping_routes), TaxiRoutes_1.Taxi_routes), TrailersRoutes_1.Trailer_routes)
 };
-const swaggerSpec = (0, swagger_jsdoc_1.default)(options);
-function swaggerDocs(app, port) {
-    //SWAGGER PAGE
-    app.use('/docs', swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swaggerSpec));
-    //DOCS IN JSON FORMAT
-    app.get("docs.json", (re, res) => {
-        res.setHeader("Content-Type", "application/json");
-        res.send(swaggerSpec);
-    });
-    console.log(`Docs AVAILABLE AT http://localhost:${port}/docs`);
-}
-exports.default = swaggerDocs;
+exports.default = swaggerDocumentation;

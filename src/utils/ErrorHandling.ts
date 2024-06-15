@@ -15,7 +15,7 @@ try {
     dosum();
 } catch (error) {
     
-    throw new CustomError(error?.stack);    
+    throw new CustomError((error as any)?.stack);    
 };
 //uncaught exceptions
 

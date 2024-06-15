@@ -60,7 +60,6 @@ export const get_trailer_by_id:RequestHandler = async (req,res) =>{
 
 export const add_trailer:RequestHandler = async(req,res)=>{
     
-    
       try {
         
         const newTrailer = await trailerModel.create(<Trailer>req.body);
@@ -90,7 +89,7 @@ export const add_trailer:RequestHandler = async(req,res)=>{
   export const updateOne_trailer:RequestHandler = async (req,res):Promise<void>=>{
      
       try {
-      const  trailerId  = req.params["trailerId"];
+      const  trailerId  = req.params["trailer_id"];
       
       const trailer = await trailerModel.updateOne(
         {_id:trailerId},
@@ -132,7 +131,7 @@ export const add_trailer:RequestHandler = async(req,res)=>{
   export const updateMany_trailer:RequestHandler = async(req,res)=>{
 
       try {
-      const  taxiId  = req.params["taxiId"];
+      const  taxiId  = req.params["trailer_id"];
       const taxi = await trailerModel.findByIdAndUpdate(taxiId,{$set:req.body});
       if(!taxi)  return ;
       res
@@ -157,11 +156,11 @@ export const add_trailer:RequestHandler = async(req,res)=>{
     } 
   
   
-  export const remove_taxi:RequestHandler = async(req,res)=>{
+  export const remove_trailer:RequestHandler = async(req,res)=>{
  
   
       try {
-      const  taxiId  = req.params["taxiId"];
+      const  taxiId  = req.params["trailer_id"];
       const taxi = await trailerModel.deleteOne({_id:taxiId},req.body);
       if(!taxi)  return ;
       res

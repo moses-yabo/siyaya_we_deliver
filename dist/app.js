@@ -13,13 +13,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const dotenv_1 = __importDefault(require("dotenv"));
+const dotenv_1 = require("dotenv");
 const mongoose_1 = __importDefault(require("mongoose"));
 const globalMiddleware_1 = require("./middlware/globalMiddleware");
 const RouteHandler_1 = __importDefault(require("./routes/RouteHandler"));
 class ServerEntryPoint {
     constructor() {
-        dotenv_1.default.config();
+        (0, dotenv_1.config)();
         this.app = (0, express_1.default)();
         this.port = process.env.PORT || 8080;
         this.middleware = new globalMiddleware_1.QuanterMiddlewares(this.app, this.port);
@@ -34,13 +34,14 @@ class ServerEntryPoint {
     configureDbConnection() {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
-            try {
-                yield mongoose_1.default.connect((_a = process.env.DB_URL) !== null && _a !== void 0 ? _a : "uri not working");
-                console.log("Db is connected...");
-            }
-            catch (error) {
-                throw new Error(error);
-            }
+            const Db_URL = (_a = process.env) === null || _a === void 0 ? void 0 : _a.DB_URL;
+            yield mongoose_1.default.connect(Db_URL)
+                .then(() => {
+                console.log("DB Connected");
+            })
+                .catch((err) => {
+                console.log(err);
+            });
         });
     }
     start() {

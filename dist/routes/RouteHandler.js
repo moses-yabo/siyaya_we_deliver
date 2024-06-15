@@ -7,5 +7,6 @@ function RoutesMountPoint(app) {
     app.use("/api/books", bookTaxiRoutes_1.bookRouter);
     app.use("/api/shipp", ShippingRoutes_1.shippRouter);
     app.use("/api/rent", rentTrailerRoutes_1.rentalRouter);
+    app.use("/api/taxi", rentTrailerRoutes_1.rentalRouter);
 }
 exports.default = RoutesMountPoint;

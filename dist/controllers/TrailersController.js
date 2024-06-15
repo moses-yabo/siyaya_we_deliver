@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.remove_taxi = exports.updateMany_trailer = exports.updateOne_trailer = exports.add_trailer = exports.get_trailer_by_id = exports.get_all_available_trailers = void 0;
+exports.remove_trailer = exports.updateMany_trailer = exports.updateOne_trailer = exports.add_trailer = exports.get_trailer_by_id = exports.get_all_available_trailers = void 0;
 const TrailerSchema_1 = __importDefault(require("../models/TrailerSchema"));
 const get_all_available_trailers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -86,7 +86,7 @@ const add_trailer = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 exports.add_trailer = add_trailer;
 const updateOne_trailer = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const trailerId = req.params["trailerId"];
+        const trailerId = req.params["trailer_id"];
         const trailer = yield TrailerSchema_1.default.updateOne({ _id: trailerId }, { $set: req.body });
         if (trailer.modifiedCount === 0) {
             res
@@ -123,7 +123,7 @@ const updateOne_trailer = (req, res) => __awaiter(void 0, void 0, void 0, functi
 exports.updateOne_trailer = updateOne_trailer;
 const updateMany_trailer = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const taxiId = req.params["taxiId"];
+        const taxiId = req.params["trailer_id"];
         const taxi = yield TrailerSchema_1.default.findByIdAndUpdate(taxiId, { $set: req.body });
         if (!taxi)
             return;
@@ -147,9 +147,9 @@ const updateMany_trailer = (req, res) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.updateMany_trailer = updateMany_trailer;
-const remove_taxi = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const remove_trailer = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const taxiId = req.params["taxiId"];
+        const taxiId = req.params["trailer_id"];
         const taxi = yield TrailerSchema_1.default.deleteOne({ _id: taxiId }, req.body);
         if (!taxi)
             return;
@@ -168,4 +168,4 @@ const remove_taxi = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         });
     }
 });
-exports.remove_taxi = remove_taxi;
+exports.remove_trailer = remove_trailer;
