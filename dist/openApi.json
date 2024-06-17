@@ -1,0 +1,1582 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Quanter Deliver API",
+        "description": "This is a Server for a Managing Quanter Deliver API.",
+        "termsOfService": "https://github.com/moses-yabo",
+        "contact": {
+            "name": "Lindile Moses Yabo",
+            "url": "https://www.linkedin.com/in/lindile-yabo-a7529519b/",
+            "email": "lindile.yabo.personal@gmail.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0.0"
+    },
+    "server": [
+        {
+            "url": "http://localhost:4000/docs",
+            "description": "Development Server"
+        }
+    ],
+    "components": {
+        "schemas": {
+            "Users": {
+                "type": "object",
+                "properties": {
+                    "_id": {
+                        "type": "string",
+                        "description": "Unique identifier for the user",
+                        "format": "uuid"
+                    },
+                    "firstName": {
+                        "type": "string",
+                        "minlength": 3,
+                        "maxlength": 22,
+                        "description": "User's first name"
+                    },
+                    "lastName": {
+                        "type": "string",
+                        "minlength": 3,
+                        "maxlength": 22,
+                        "description": "User's last name",
+                        "required": true
+                    },
+                    "user_name": {
+                        "type": "string",
+                        "description": "User's username",
+                        "required": true
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "description": "User's email address",
+                        "required": true,
+                        "unique": true,
+                        "lowercase": true
+                    },
+                    "password": {
+                        "type": "string",
+                        "minlength": 8,
+                        "maxlength": 250,
+                        "description": "User's password",
+                        "required": true
+                    },
+                    "role": {
+                        "type": "string",
+                        "enum": ["ADMIN", "USER", "GUEST"],
+                        "description": "User's role",
+                        "default": "ADMIN"
+                    }
+                }
+            },
+            "Taxi": {
+                "type": "object",
+                "properties": {
+                    "imgUrl": {
+                        "type": "string",
+                        "oneOf": [
+                            { "type": "string" },
+                            { "type": "string", "format": "binary" }
+                        ],
+                        "minlength": 3,
+                        "maxlength": 250,
+                        "description": "Image of the taxi",
+                        "required": [false, "image of the taxi"]
+                    },
+                    "description": {
+                        "type": "string",
+                        "minlength": 8,
+                        "maxlength": 250,
+                        "description": "Drop off location date is a required field",
+                        "required": [true, "Drop off location date is a required field"]
+                    },
+                    "capacity": {
+                        "type": "string",
+                        "description": "Pick up time is a required field",
+                        "required": [true, "Pick up time is a required field"]
+                    },
+                    "fleet_no": {
+                        "type": "string",
+                        "minlength": 10,
+                        "maxlength": 35,
+                        "description": "fare is a required field",
+                        "required": [true, "fare is a required field"]
+                    },
+                    "isAvailable": {
+                        "type": "boolean",
+                        "description": "TripType is a required field",
+                        "required": [true, "TripType is a required field"]
+                    },
+                    "isBooked": {
+                        "type": "boolean",
+                        "description": "TripType is a required field",
+                        "required": [true, "TripType is a required field"]
+                    }
+                }
+            },
+            "Trailer": {
+                "type": "object",
+                "properties": {
+                    "imgUrl": {
+                        "type": "string",
+                        "oneOf": [
+                            { "type": "string" },
+                            { "type": "string", "format": "binary" }
+                        ],
+                        "minlength": 3,
+                        "maxlength": 250,
+                        "description": "Image of the taxi",
+                        "required": [false, "image of the taxi"]
+                    },
+                    "description": {
+                        "type": "string",
+                        "minlength": 8,
+                        "maxlength": 250,
+                        "description": "Drop off location date is a required field",
+                        "required": [true, "Drop off location date is a required field"]
+                    },
+                    "capacity": {
+                        "type": "string",
+                        "description": "Pick up time is a required field",
+                        "required": [true, "Pick up time is a required field"]
+                    },
+                    "fleet_no": {
+                        "type": "string",
+                        "minlength": 10,
+                        "maxlength": 35,
+                        "description": "fare is a required field",
+                        "required": [true, "fare is a required field"]
+                    },
+                    "isAvailable": {
+                        "type": "boolean",
+                        "description": "TripType is a required field",
+                        "required": [true, "TripType is a required field"]
+                    },
+                    "isBooked": {
+                        "type": "boolean",
+                        "description": "TripType is a required field",
+                        "required": [true, "TripType is a required field"]
+                    }
+                }
+            },
+            "Products": {
+                "type": "object",
+                "properties": {
+                    "productId": {
+                        "type": "string",
+                        "description": "Reference to the product's _id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Name of the product"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Description of the product"
+                    },
+                    "price": {
+                        "type": "number",
+                        "description": "Price of the product"
+                    },
+                    "category": {
+                        "type": "string",
+                        "description": "Category of the product"
+                    }
+                }
+            },
+            "TaxiBooking": {
+                "type": "object",
+                "properties": {
+                    "passengerId": {
+                        "type": "string",
+                        "description": "Reference to the booking passenger's _id"
+                    },
+                    "driverId": {
+                        "type": "string",
+                        "description": "Reference to the booking driver's _id"
+                    },
+                    "pickupLocation": {
+                        "type": "string",
+                        "description": "The pickup location for the booking"
+                    },
+                    "dropoffLocation": {
+                        "type": "string",
+                        "description": "The dropoff location for the booking"
+                    },
+                    "pickupTime": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "The pickup time for the booking"
+                    },
+                    "fare": {
+                        "type": "number",
+                        "description": "The fare amount for the booking"
+                    },
+                    "tripType": {
+                        "type": "string",
+                        "enum": ["LOCAL_TRIP", "NATIONAL_TRIP"],
+                        "description": "The type of trip for the booking (local or national)"
+                    }
+                }
+            },
+            "Rentals": {
+                "type": "object",
+                "properties": {
+                    "productId": {
+                        "type": "string",
+                        "description": "Reference to the product's _id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Name of the product"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Description of the product"
+                    },
+                    "price": {
+                        "type": "number",
+                        "description": "Price of the product"
+                    },
+                    "category": {
+                        "type": "string",
+                        "description": "Category of the product"
+                    }
+                }
+            },
+            "Shipping": {
+                "type": "object",
+                "properties": {
+                    "trip_type": {
+                        "type": "string",
+                        "enum": ["LOCAL_TRIP", "NATIONAL_TRIP"],
+                        "description": "Reference to the product's _id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Name of the product"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Description of the product"
+                    },
+                    "price": {
+                        "type": "number",
+                        " description": "Price of the product"
+                    },
+                    "category": {
+                        "type": "string",
+                        "description": "Category of the product"
+                    }
+                }
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        }
+    },
+    "paths": {
+        "/api/users": {
+            "get": {
+                "summary": "Get all Users",
+                "tags": [
+                    "Users"
+                ],
+                "description": "Get all Users",
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Users"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create a User.",
+                "tags": [
+                    "Users"
+                ],
+                "description": "Create a User.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Users"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Users"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/users/{user_id}": {
+            "get": {
+                "summary": "Get User By Id",
+                "tags": [
+                    "Users"
+                ],
+                "description": "Add a User.",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Retrieve user by ID"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Users"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Update Taxi by ID",
+                "tags": [
+                    "Users"
+                ],
+                "description": "Update User By Id",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": " Update User by ID"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Users"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Users"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "summary": "Update User by ID",
+                "tags": [
+                    "Users"
+                ],
+                "description": "Partially update Product To Be Taxi By Id",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Update user by ID"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Users"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "Successful response (no content)"
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete a user by Id",
+                "tags": [
+                    "Users"
+                ],
+                "description": "Delete Product Trailer by its ID.",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Delete user by ID"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful response (no content)"
+                    }
+                }
+            }
+        },
+        "/api/taxi": {
+            "get": {
+                "summary": "Get all available Taxi's ",
+                "tags": [
+                    "Taxi"
+                ],
+                "description": "Get all Taxi Products rentals.",
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Taxi"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Add a Taxi",
+                "tags": [
+                    "Taxi"
+                ],
+                "description": "Create a Taxi ",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Taxi"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Taxi"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/taxi/{taxi_id}": {
+            "get": {
+                "summary": "Get a taxi by Id",
+                "tags": [
+                    "Taxi"
+                ],
+                "description": "Get a taxi by Id",
+                "parameters": [
+                    {
+                        "name": "taxi_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "ID of the Taxi ID to retrieve"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Taxi"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Update Taxi by ID",
+                "tags": [
+                    "Taxi"
+                ],
+                "description": "Update Product To Be Taxi By Id",
+                "parameters": [
+                    {
+                        "name": "taxi_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "ID of the Taxi ID to update"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Taxi"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Taxi"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "summary": "Update Taxi by ID",
+                "tags": [
+                    "Taxi"
+                ],
+                "description": "Partially update  Taxi By Id",
+                "parameters": [
+                    {
+                        "name": "taxi_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": " Update Taxi by ID "
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Taxi"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "Successful response (no content)"
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete a taxi by Id",
+                "tags": [
+                    "Taxi"
+                ],
+                "description": "Delete Taxi by ID.",
+                "parameters": [
+                    {
+                        "name": "taxi_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Delete Taxi using Id"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful response (no content)"
+                    }
+                }
+            }
+        },
+        "/api/product": {
+            "get": {
+                "summary": "Get all products",
+                "tags": [
+                    "Products"
+                ],
+                "description": "Get a list of all products.",
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Products"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create a new product",
+                "tags": [
+                    "Products"
+                ],
+                "description": "Create a Product.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Products"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Products"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/product/{product_id}": {
+            "get": {
+                "summary": "Get a Product by ID",
+                "tags": [
+                    "Products"
+                ],
+                "description": "Get a single product by its ID.",
+                "parameters": [
+                    {
+                        "name": "product_id",
+                        "in": "path",
+                        "description": "ID of the product to retrieve",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Products"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Update a product by ID",
+                "tags": [
+                    "Products"
+                ],
+                "description": "Update an existing taxi product by its ID.",
+                "parameters": [
+                    {
+                        "name": "product_id",
+                        "in": "path",
+                        "description": "ID of the product to update",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Products"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Products"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "summary": "Partially update a product by ID",
+                "tags": [
+                    "Products"
+                ],
+                "description": "Partially update an existing taxi product by its ID.",
+                "parameters": [
+                    {
+                        "name": "product_id",
+                        "in": "path",
+                        "description": "ID of the product to update",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Products"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Products"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete a product by ID",
+                "tags": [
+                    "Products"
+                ],
+                "description": "Delete a  product by its ID.",
+                "parameters": [
+                    {
+                        "name": "product_id",
+                        "in": "path",
+                        "description": "ID of the product to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful response (no content)"
+                    }
+                }
+            }
+        },
+        "/api/trailer": {
+            "get": {
+                "summary": "Get all Taxi Productd rentals",
+                "tags": [
+                    "Trailers"
+                ],
+                "description": "Get all Taxi Products rentals.",
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Taxi"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create Trailer Id.",
+                "tags": [
+                    "Trailers"
+                ],
+                "description": "Create Trailer Id.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Taxi"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Taxi"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/trailer/{trailer_id}": {
+            "get": {
+                "summary": "Get Product Trailer By Id",
+                "tags": [
+                    "Trailers"
+                ],
+                "description": "Add a Trailer.",
+                "parameters": [
+                    {
+                        "name": "trailer_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "ID of the Trailer Id to retrieve"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Trailer"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Update Trailer by ID",
+                "tags": [
+                    "Trailers"
+                ],
+                "description": "Update Product To Be Trailer By Id",
+                "parameters": [
+                    {
+                        "name": "trailer_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "ID of the Trailer Id to update"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Trailer"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Trailer"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "summary": "Update Trailer by ID",
+                "tags": [
+                    "Trailers"
+                ],
+                "description": "Partially update  Trailer By Id",
+                "parameters": [
+                    {
+                        "name": "trailer_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "ID of the Trailer Id to update"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Trailer"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "Successful response (no content)"
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete a Trailer",
+                "tags": [
+                    "Trailers"
+                ],
+                "description": "Delete Product Trailer by its ID.",
+                "parameters": [
+                    {
+                        "name": "trailer_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "ID of the Trailer Id to delete"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful response (no content)"
+                    }
+                }
+            }
+        },
+        "/api/books": {
+            "get": {
+                "summary": "Get all bookings",
+                "tags": [
+                    "Taxi Bookings"
+                ],
+                "description": "Get a list of all taxi bookings.",
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/TaxiBooking"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create a new booking",
+                "tags": [
+                    "Taxi Bookings"
+                ],
+                "description": "Create a new taxi booking.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TaxiBooking"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TaxiBooking"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/books/{bookingId}": {
+            "get": {
+                "summary": "Get a booking by ID",
+                "tags": [
+                    "Taxi Bookings"
+                ],
+                "description": "Get a single taxi booking by its ID.",
+                "parameters": [
+                    {
+                        "name": "booking_id",
+                        "in": "path",
+                        "description": "ID of the booking to retrieve",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TaxiBooking"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Update a booking by ID",
+                "tags": [
+                    "Taxi Bookings"
+                ],
+                "description": "Update an existing taxi booking by its ID.",
+                "parameters": [
+                    {
+                        "name": "booking_id",
+                        "in": "path",
+                        "description": "ID of the booking to update",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TaxiBooking"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TaxiBooking"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "summary": "Partially update a booking by ID",
+                "tags": [
+                    "Taxi Bookings"
+                ],
+                "description": "Partially update an existing taxi booking by its ID.",
+                "parameters": [
+                    {
+                        "name": "booking_id",
+                        "in": "path",
+                        "description": "ID of the booking to update",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TaxiBooking"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TaxiBooking"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete a booking by ID",
+                "tags": [
+                    "Taxi Bookings"
+                ],
+                "description": "Delete a taxi booking by its ID.",
+                "parameters": [
+                    {
+                        "name": "booking_id",
+                        "in": "path",
+                        "description": "ID of the booking to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful response (no content)"
+                    }
+                }
+            }
+        },
+        "/api/rent": {
+            "get": {
+                "summary": "Get all rentals",
+                "tags": [
+                    "Trailer rentals"
+                ],
+                "description": "Get a list of all rentals.",
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Rentals"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create a new rental",
+                "tags": [
+                    "Trailer rentals"
+                ],
+                "description": "Rent a trailer",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Rentals"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Rentals"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/rent/{rental_id}": {
+            "get": {
+                "summary": "Get a rental by ID",
+                "tags": [
+                    "Trailer rentals"
+                ],
+                "description": "Get a single taxi rental by its ID.",
+                "parameters": [
+                    {
+                        "name": "rental_id",
+                        "in": "path",
+                        "description": "ID of the rental to retrieve",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Rentals"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Update a rental by ID",
+                "tags": [
+                    "Trailer rentals"
+                ],
+                "description": "Update an existing rental by its ID.",
+                "parameters": [
+                    {
+                        "name": "rental_id",
+                        "in": "path",
+                        "description": "ID of the rental to update",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Rentals"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Rentals"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "summary": "Partially update a rental by ID",
+                "tags": [
+                    "Trailer rentals"
+                ],
+                "description": "Partially update an existing taxi rental by its ID.",
+                "parameters": [
+                    {
+                        "name": "rental_id",
+                        "in": "path",
+                        "description": "ID of the rental to update",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Rentals"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Rentals1"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete a rental by ID",
+                "tags": [
+                    "Trailer rentals"
+                ],
+                "description": "Delete a rental by its ID.",
+                "parameters": [
+                    {
+                        "name": "rental_id",
+                        "in": "path",
+                        "description": "ID of the rental to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful response (no content)"
+                    }
+                }
+            }
+        },
+        "/api/shipp": {
+            "get": {
+                "summary": "Get all shippings",
+                "tags": [
+                    "Product shipping"
+                ],
+                "description": "Get a list of all shippings.",
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Shipping"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create a new shipping",
+                "tags": [
+                    "Product shipping"
+                ],
+                "description": "Rent a trailer",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Shipping"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Shipping"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/shipp/{shipping_id}": {
+            "get": {
+                "summary": "Get a shipping by ID",
+                "tags": [
+                    "Product shipping"
+                ],
+                "description": "Get a single taxi shipping by its ID.",
+                "parameters": [
+                    {
+                        "name": "shipping_id",
+                        "in": "path",
+                        "description": "ID of the shipping to retrieve",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Shipping"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Update a shipping by ID",
+                "tags": [
+                    "Product shipping"
+                ],
+                "description": "Update an existing shipping by its ID.",
+                "parameters": [
+                    {
+                        "name": "shipping_id",
+                        "in": "path",
+                        "description": "ID of the shipping to update",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Shipping"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Shipping"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "summary": "Partially update a shipping by ID",
+                "tags": [
+                    "Product shipping"
+                ],
+                "description": "Partially update an existing shipping by its ID.",
+                "parameters": [
+                    {
+                        "name": "shipping_id",
+                        "in": "path",
+                        "description": "ID of the shipping to update",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Shipping"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Shipping"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete a shipping by ID",
+                "tags": [
+                    "Product shipping"
+                ],
+                "description": "Delete a shipping by its ID.",
+                "parameters": [
+                    {
+                        "name": "shipping_id",
+                        "in": "path",
+                        "description": "ID of the shipping to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful response (no content)"
+                    }
+                }
+            }
+        }
+    }
+}

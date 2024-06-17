@@ -3,9 +3,7 @@ import { IUser,User_roles } from "../types/userTypes";
 
 
 const userSchema:Schema<IUser> = new mongoose.Schema({
-    _id:{
-        type:Schema.Types.ObjectId
-    },
+  
     firstName:{
         type:String ,
           minlength:3,

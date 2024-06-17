@@ -12,166 +12,110 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.remove_shipping = exports.updateMany_shipping = exports.updateOne_shipping = exports.create_shipping = exports.get_shippings_by_id = exports.get_all_shippings = void 0;
+exports.shippingController = void 0;
 const ShippingSchema_1 = __importDefault(require("../models/ShippingSchema"));
-const get_all_shippings = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const products = yield ShippingSchema_1.default.find({});
-        if (!products)
-            return;
-        res
-            .status(200)
-            .json({
-            status: "success",
-            data: products
+const mongoose_1 = require("mongoose");
+class ShippingController {
+    constructor() {
+        this.get_all_shippings = (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const shippings = yield ShippingSchema_1.default.find({});
+                if (shippings.length === 0)
+                    return res.status(404).json({ status: "shipping Not Found !", code: 404 });
+                res.status(200).json({ status: "success !!", data: shippings });
+            }
+            catch (error) {
+                res.status(500).json({ status: "Internal Server Error", msg: error });
+            }
         });
-    }
-    catch (error) {
-        if (error || res.statusCode >= 400) {
-            res
-                .status(401)
-                .json({
-                status: "failed",
-                msg: { error }
-            });
-        }
-    }
-});
-exports.get_all_shippings = get_all_shippings;
-const get_shippings_by_id = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const shippingId = req.params["shippingId"];
-    try {
-        const shipping = yield ShippingSchema_1.default.findById(shippingId);
-        console.log(shipping);
-        if (!shipping)
-            return;
-        res
-            .status(200)
-            .json({
-            status: "success",
-            data: shipping
+        this.get_shipping_by_id = (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const shipping_id = req.params["shipping_id"];
+                if (!(0, mongoose_1.isValidObjectId)(shipping_id))
+                    return res.status(400).json({ status: "failed", message: "Invalid shipping ID" });
+                const shipping = yield ShippingSchema_1.default.findById(shipping_id);
+                if (!shipping)
+                    return res.status(404).json({ status: "shipping not found" });
+                res.status(200).json({ status: "success", data: shipping });
+            }
+            catch (error) {
+                res.status(500).json({ status: "Failed", msg: "500 internal server Error", error });
+            }
         });
-    }
-    catch (error) {
-        res
-            .status(404)
-            .json({
-            status: "Failed",
-            msg: error
+        this.create_shipping = (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const shipping = yield ShippingSchema_1.default.create(req.body);
+                return res.status(201).json({ message: "Created a shippingr", status: 201, data: shipping });
+            }
+            catch (error) {
+                if (error instanceof Error) {
+                    if (error.name === 'ValidationError') {
+                        return res.status(400).json({ message: "Validation error: " + error.message, status: 400 });
+                    }
+                    return res.status(500).json({ message: error.message, status: 500 });
+                }
+                return res.status(500).json({ message: "Failed to create a shipping", status: 500 });
+            }
         });
-    }
-});
-exports.get_shippings_by_id = get_shippings_by_id;
-const create_shipping = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const newShipping = yield ShippingSchema_1.default.create(req.body);
-        if (!newShipping)
-            return;
-        res
-            .status(201)
-            .json({
-            status: "success!",
-            data: newShipping
+        this.updateOne_shipping = (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const shipping_id = req.params["shipping_id"];
+                if (!(0, mongoose_1.isValidObjectId)(shipping_id)) {
+                    res.status(400).json({ status: "failed", message: "Invalid shipping ID" });
+                    return;
+                }
+                ;
+                const trailerUpdate = yield ShippingSchema_1.default.findOneAndUpdate({ _id: shipping_id }, { $set: req.body }, { new: true });
+                if (!trailerUpdate) {
+                    res.status(404).json({ status: "failed", msg: "shipping not found !" });
+                }
+                const isUpdated = trailerUpdate !== null;
+                if (isUpdated) {
+                    res.status(204).json({ status: "success !", data: trailerUpdate });
+                    return;
+                }
+                else {
+                    res.status(500).json({ message: "Failed to update shipping" });
+                }
+            }
+            catch (error) {
+                res.status(500).json({ status: "Internal server error", msg: error });
+            }
         });
-    }
-    catch (error) {
-        res
-            .status(401)
-            .json({
-            status: "failed",
-            msg: { error }
+        this.updateMany_shipping = (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const shipping_id = req.params["shipping_id"];
+                if (!(0, mongoose_1.isValidObjectId)(shipping_id)) {
+                    res.status(400).json({ status: "failed", message: "Invalid shipping ID" });
+                }
+                ;
+                const trailer = yield ShippingSchema_1.default.updateOne({ _id: shipping_id }, { $set: req.body });
+                if (trailer.modifiedCount === 0) {
+                    res.status(500).json({ status: "failed updating a document", msg: "updated booking failed ..." });
+                }
+                res.status(204).json({ status: "success !" });
+            }
+            catch (error) {
+                res.status(500).json({ status: "failed ", msg: error });
+            }
         });
-    }
-});
-exports.create_shipping = create_shipping;
-const updateOne_shipping = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const shippingId = req.params["shippingId"];
-        const updatedProduct = yield ShippingSchema_1.default.updateOne({ _id: shippingId }, { $set: req.body });
-        if (updatedProduct.modifiedCount === 0) {
-            res.status(404).json({
-                status: "failed",
-                msg: "Shipping not found or not updated"
-            });
-            return;
-        }
-        res
-            .status(200)
-            .json({
-            status: "success !",
-            data: updatedProduct
-        });
-    }
-    catch (error) {
-        res
-            .status(404)
-            .json({
-            status: "failed 😭",
-            msg: "An Error Occured during an update",
-            err: { error }
-        });
-    }
-});
-exports.updateOne_shipping = updateOne_shipping;
-const updateMany_shipping = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const shippingId = req.params["shippingId"];
-    try {
-        const updatedShipp = yield ShippingSchema_1.default.findByIdAndUpdate(shippingId, req.body, {
-            new: true,
-            runValidators: true
-        });
-        if (!(updatedShipp === null || updatedShipp === void 0 ? void 0 : updatedShipp.isModified)) {
-            res.status(404).json({
-                status: "failed 😭",
-                msg: "Shipping not found"
-            });
-            return;
-        }
-        ;
-        res
-            .status(200)
-            .json({
-            status: "success !",
-            data: {
-                msg: "updated shippment ...",
-                updatedShipp
+        this.remove_shipping = (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const taxi_id = req.params["taxi_id"];
+                if (!(0, mongoose_1.isValidObjectId)(taxi_id)) {
+                    return res.status(400).json({ status: "failed", message: "Invalid taxi ID" });
+                }
+                const user = yield ShippingSchema_1.default.deleteOne({ _id: taxi_id });
+                if (user.deletedCount === 0) {
+                    res.status(404).json({ status: "Failed ", message: "shipping not found" });
+                }
+                ;
+                res.status(204).json({ status: "success in deletion of traxi a doc !" });
+            }
+            catch (error) {
+                res.status(500).json({ status: "Internal Server Error", msg: error });
             }
         });
     }
-    catch (error) {
-        res
-            .status(500)
-            .json({
-            status: "failed 😭",
-            msg: "An Error Occured during update ",
-            err: error
-        });
-    }
-});
-exports.updateMany_shipping = updateMany_shipping;
-const remove_shipping = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const shippingId = req.params["shippingId"];
-    try {
-        const removedShipp = yield ShippingSchema_1.default.findByIdAndDelete({ _id: shippingId }, { $set: req.body });
-        if (!removedShipp)
-            return;
-        res
-            .status(204)
-            .json({
-            status: "success !",
-            data: {
-                msg: "removed shippment ...",
-            }
-        });
-    }
-    catch (error) {
-        res
-            .status(404)
-            .json({
-            status: "failed 😭",
-            msg: { error }
-        });
-    }
-    ;
-});
-exports.remove_shipping = remove_shipping;
+}
+exports.shippingController = new ShippingController();

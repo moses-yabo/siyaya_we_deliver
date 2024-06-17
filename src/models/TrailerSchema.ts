@@ -5,8 +5,6 @@ import { Trailer,Trailer_Hire } from "../types/trailerTypes";
 const TrailerSchema:Schema<Trailer> = new mongoose.Schema({
     imgUrl:{
     type:Object.values([Schema.Types.Buffer, String]),
-    minlength:3,
-    maxlength:250,
     required:[false,"image of the taxi"]
 },
 description:{

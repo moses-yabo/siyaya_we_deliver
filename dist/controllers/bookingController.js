@@ -12,162 +12,110 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.remove_booking = exports.updateMany_booking = exports.updateOne_booking = exports.create_booking = exports.get_booking_by_id = exports.get_all_booking = void 0;
+exports.bookingController = void 0;
 const BookingSchema_1 = __importDefault(require("../models/BookingSchema"));
-const get_all_booking = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const bookings = yield BookingSchema_1.default.find({});
-        if (!bookings)
-            return;
-        res
-            .status(200)
-            .json({
-            status: "success !!",
-            data: bookings
+const mongoose_1 = require("mongoose");
+class BookingController {
+    constructor() {
+        this.get_all_bookings = (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const taxi_booking = yield BookingSchema_1.default.find({});
+                if (taxi_booking.length === 0)
+                    return res.status(404).json({ status: "booking Not Found !", code: 404 });
+                res.status(200).json({ status: "success !!", data: taxi_booking });
+            }
+            catch (error) {
+                res.status(500).json({ status: "Internal Server Error", msg: error });
+            }
         });
-    }
-    catch (error) {
-        res
-            .statusCode >= 400 ? res
-            .json({
-            status: "failed",
-            msg: error
-        })
-            : Error(error);
-    }
-});
-exports.get_all_booking = get_all_booking;
-const get_booking_by_id = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const bookingId = req.params["bookingId"];
-        const booking = yield BookingSchema_1.default.findById(bookingId);
-        if (!booking)
-            return;
-        res
-            .status(200)
-            .json({
-            status: "success",
-            data: booking
+        this.get_booking_by_id = (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const booking_id = req.params["booking_id"];
+                if (!(0, mongoose_1.isValidObjectId)(booking_id))
+                    return res.status(400).json({ status: "failed", message: "Invalid booking ID" });
+                const booking = yield BookingSchema_1.default.findById(booking_id);
+                if (!booking)
+                    return res.status(404).json({ status: "booking not found" });
+                res.status(200).json({ status: "success", data: booking });
+            }
+            catch (error) {
+                res.status(500).json({ status: "Failed", msg: "500 internal server Error", error });
+            }
         });
-    }
-    catch (error) {
-        res
-            .status(404)
-            .json({
-            status: "Failed",
-            msg: "404 resources not found",
-            error
-        });
-    }
-});
-exports.get_booking_by_id = get_booking_by_id;
-const create_booking = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const newBooking = yield BookingSchema_1.default.create(req.body);
-        if (!newBooking)
-            return;
-        res
-            .status(201)
-            .json({
-            status: 'success',
-            data: newBooking
-        });
-    }
-    catch (error) {
-        res
-            .status(404)
-            .json({
-            status: "failed",
-            err: { error }
-        });
-        throw Error(error);
-    }
-});
-exports.create_booking = create_booking;
-const updateOne_booking = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const bookingId = req.params["bookingId"];
-        console.log(bookingId);
-        const booking = yield BookingSchema_1.default.updateOne({ _id: bookingId }, { $set: req.body });
-        if (booking.modifiedCount === 0) {
-            console.log(booking.acknowledged);
-            res
-                .status(500)
-                .json({
-                status: "failed updating a document",
-                err: {
-                    msg: "updated booking failed ...",
+        this.create_booking = (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const booking = yield BookingSchema_1.default.create(req.body);
+                return res.status(201).json({ message: "Created a bookingr", status: 201, data: booking });
+            }
+            catch (error) {
+                if (error instanceof Error) {
+                    if (error.name === 'ValidationError') {
+                        return res.status(400).json({ message: "Validation error: " + error.message, status: 400 });
+                    }
+                    return res.status(500).json({ message: error.message, status: 500 });
                 }
-            });
-            return;
-        }
-        res
-            .status(201)
-            .json({
-            status: "success !",
-            data: {
-                msg: "updated booking ...",
-                data: {
-                    booking
+                return res.status(500).json({ message: "Failed to create a booking", status: 500 });
+            }
+        });
+        this.updateOne_booking = (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const booking_id = req.params["booking_id"];
+                if (!(0, mongoose_1.isValidObjectId)(booking_id)) {
+                    res.status(400).json({ status: "failed", message: "Invalid booking ID" });
+                    return;
                 }
+                ;
+                const bookingUpdate = yield BookingSchema_1.default.findOneAndUpdate({ _id: booking_id }, { $set: req.body }, { new: true });
+                if (!bookingUpdate) {
+                    res.status(404).json({ status: "failed", msg: "booking not found !" });
+                }
+                const isUpdated = bookingUpdate !== null;
+                if (isUpdated) {
+                    res.status(204).json({ status: "success !", data: bookingUpdate });
+                    return;
+                }
+                else {
+                    res.status(500).json({ message: "Failed to update booking" });
+                }
+            }
+            catch (error) {
+                res.status(500).json({ status: "Internal server error", msg: error });
+            }
+        });
+        this.updateMany_booking = (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const booking_id = req.params["booking_id"];
+                if (!(0, mongoose_1.isValidObjectId)(booking_id)) {
+                    res.status(400).json({ status: "failed", message: "Invalid booking ID" });
+                }
+                ;
+                const booking = yield BookingSchema_1.default.updateOne({ _id: booking_id }, { $set: req.body });
+                if (booking.modifiedCount === 0) {
+                    res.status(500).json({ status: "failed updating a document", msg: "updated booking failed ..." });
+                }
+                res.status(204).json({ status: "success !" });
+            }
+            catch (error) {
+                res.status(500).json({ status: "failed ", msg: error });
+            }
+        });
+        this.remove_booking = (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const booking_id = req.params["booking_id"];
+                if (!(0, mongoose_1.isValidObjectId)(booking_id)) {
+                    return res.status(400).json({ status: "failed", message: "Invalid booking ID" });
+                }
+                const booking = yield BookingSchema_1.default.deleteOne({ _id: booking_id });
+                if (booking.deletedCount === 0) {
+                    res.status(404).json({ status: "Failed ", message: "booking not found" });
+                }
+                ;
+                res.status(204).json({ status: "success in deletion of traxi a doc !" });
+            }
+            catch (error) {
+                res.status(500).json({ status: "Internal Server Error", msg: error });
             }
         });
     }
-    catch (error) {
-        res
-            .status(500)
-            .json({
-            status: "failed 😭",
-            msg: { error }
-        });
-    }
-});
-exports.updateOne_booking = updateOne_booking;
-const updateMany_booking = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const bookingId = req.params["bookingId"];
-        const booking = yield BookingSchema_1.default.findByIdAndUpdate(bookingId, { $set: req.body });
-        if (!booking)
-            return;
-        res
-            .status(201)
-            .json({
-            status: "success !",
-            data: {
-                msg: "updated booking ...",
-                booking
-            }
-        });
-    }
-    catch (error) {
-        res
-            .status(404)
-            .json({
-            status: "failed 😭",
-            msg: { error }
-        });
-    }
-});
-exports.updateMany_booking = updateMany_booking;
-const remove_booking = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const bookingId = req.params["bookingId"];
-        const booking = yield BookingSchema_1.default.deleteOne({ bookingId }, req.body);
-        if (!booking)
-            return;
-        res
-            .status(204)
-            .json({
-            status: "success in deletion of a doc !"
-        });
-    }
-    catch (error) {
-        res
-            .status(404)
-            .json({
-            status: "failed 😭",
-            msg: { error }
-        });
-    }
-});
-exports.remove_booking = remove_booking;
+}
+exports.bookingController = new BookingController();

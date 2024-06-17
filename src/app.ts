@@ -2,21 +2,20 @@ import express from "express";
 import {config} from "dotenv";
 import mongoose from "mongoose";
 import { QuanterMiddlewares } from "./middlware/globalMiddleware";
-import  RoutesHandler from "./routes/RouteHandler";
 
 
 class ServerEntryPoint {
   private app: express.Application;
   private port: number | string;
   protected middleware:QuanterMiddlewares;
-  protected routes:void;
+ 
 
   constructor() {
     config();
     this.app = express();
-    this.port = process.env.PORT || 8080;
+    this.port = process.env.PORT as string | number;
     this.middleware = new QuanterMiddlewares(this.app,<number>this.port)
-    this.routes = RoutesHandler(this.app);
+    
 
     try {
       this.configureDbConnection();  
@@ -30,15 +29,17 @@ class ServerEntryPoint {
 
   private async configureDbConnection() {
     const Db_URL = process.env?.DB_URL as string;
-     
-        await mongoose.connect(Db_URL)
-        .then(()=>{
+    const DB_PASSWORD = process.env?.DB_PASSWORD as string
+    mongoose.set('strictQuery', false);
+
+    await mongoose.connect(Db_URL.replace("<password>",DB_PASSWORD))
+    .then(()=>{
           console.log("DB Connected");
         })
-        .catch((err:Error)=>{
-              console.log(err);
+    .catch((err:Error)=>{
+              console.log(err?.message);
         });
-        
+
         
 
   }

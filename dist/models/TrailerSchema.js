@@ -27,8 +27,6 @@ const mongoose_1 = __importStar(require("mongoose"));
 const TrailerSchema = new mongoose_1.default.Schema({
     imgUrl: {
         type: Object.values([mongoose_1.Schema.Types.Buffer, String]),
-        minlength: 3,
-        maxlength: 250,
         required: [false, "image of the taxi"]
     },
     description: {

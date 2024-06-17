@@ -22,7 +22,6 @@ export interface TrailerBooking extends Document {
     fleet_no:string;
     description:String
     isRented: Boolean;
-    // Add other properties related to trailers
   }
   
 

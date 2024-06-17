@@ -1,20 +1,22 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const CustomErrorHandling_1 = require("./CustomErrorHandling");
 const error = new Error("something went wrong");
 // console.log("error stack",error.stack);
 // console.log("message",error.message);
 // console.log("Name",error.name);
-function dosum() {
-    const sata = fetch("localhost:300/api");
-    // console.log("I am from the do function")
-    return sata;
-}
 try {
-    dosum();
+    function dosum() {
+        const sata = fetch("localhost:4000/api/docs");
+        // console.log("I am from the do function")
+        return sata.then((res) => console.log(res));
+    }
+    const result = dosum();
+    console.log(result);
 }
 catch (error) {
-    throw new CustomErrorHandling_1.CustomError(error === null || error === void 0 ? void 0 : error.stack);
+    if (error instanceof Error) {
+        console.log(error.message);
+    }
 }
 ;
 //uncaught exceptions
