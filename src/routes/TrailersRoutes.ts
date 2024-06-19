@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { trailerController} from "../controllers/TrailersController";
+import { validateObjectId } from "../middlewares/validationMiddleware";
 
 
 
@@ -17,10 +18,10 @@ class TrailerRouter {
         .post(add_trailer);
         this.router
         .route("/:trailer_id")
-        .get(get_trailer_by_id)
-        .put(updateMany_trailer)
-        .patch(updateOne_trailer)
-        .delete(remove_trailer);
+        .get(validateObjectId("trailer_id"),get_trailer_by_id)
+        .put(validateObjectId("trailer_id"),updateMany_trailer)
+        .patch(validateObjectId("trailer_id"),updateOne_trailer)
+        .delete(validateObjectId("trailer_id"),remove_trailer);
 
     }
 }

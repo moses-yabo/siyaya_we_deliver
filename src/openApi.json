@@ -1076,7 +1076,7 @@
               }
             }
           },
-          "/api/books/{bookingId}": {
+          "/api/books/{booking_id}": {
             "get": {
               "summary": "Get a booking by ID",
               "tags": [

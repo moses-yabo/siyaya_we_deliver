@@ -1,5 +1,5 @@
 import mongoose,{ Schema} from "mongoose";
-import { Trailer,Trailer_Hire } from "../types/trailerTypes";
+import { Trailer} from "../types/trailerTypes";
 
 
 const TrailerSchema:Schema<Trailer> = new mongoose.Schema({

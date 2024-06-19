@@ -14,106 +14,110 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.productController = void 0;
 const ProductsSchema_1 = __importDefault(require("../models/ProductsSchema"));
-const mongoose_1 = require("mongoose");
+const responseMiddleware_1 = require("../middlewares/responseMiddleware");
+const CustomErrorHandling_1 = require("../utils/CustomErrorHandling");
 class ProductController {
     constructor() {
         this.get_all_products = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const products = yield ProductsSchema_1.default.find({});
                 if (products.length === 0)
-                    return res.status(404).json({ status: "product Not Found !", code: 404 });
-                res.status(200).json({ status: "success !!", data: products });
+                    return (0, responseMiddleware_1.sendResponse)(res, 404, "Products Not Found!");
+                (0, responseMiddleware_1.sendResponse)(res, 200, "Success!", products);
             }
             catch (error) {
-                res.status(500).json({ status: "Internal Server Error", msg: error });
+                if (error instanceof CustomErrorHandling_1.CustomError) {
+                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
+                }
+                else {
+                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal Server Error");
+                }
             }
         });
         this.get_product_by_id = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const product_id = req.params["product_id"];
-                if (!(0, mongoose_1.isValidObjectId)(product_id))
-                    return res.status(400).json({ status: "failed", message: "Invalid product ID" });
                 const product = yield ProductsSchema_1.default.findById(product_id);
                 if (!product)
-                    return res.status(404).json({ status: "product not found" });
-                res.status(200).json({ status: "success", data: product });
+                    return (0, responseMiddleware_1.sendResponse)(res, 404, "Product not found");
+                (0, responseMiddleware_1.sendResponse)(res, 200, "Success!", product);
             }
             catch (error) {
-                res.status(500).json({ status: "Failed", msg: "500 internal server Error", error });
+                if (error instanceof CustomErrorHandling_1.CustomError) {
+                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
+                }
+                else {
+                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal Server Error");
+                }
             }
         });
         this.create_product = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const product = yield ProductsSchema_1.default.create(req.body);
-                return res.status(201).json({ message: "Created a productr", status: 201, data: product });
+                return (0, responseMiddleware_1.sendResponse)(res, 201, "Created a product", product);
             }
             catch (error) {
-                if (error instanceof Error) {
+                if (error instanceof CustomErrorHandling_1.CustomError) {
                     if (error.name === 'ValidationError') {
-                        return res.status(400).json({ message: "Validation error: " + error.message, status: 400 });
+                        return (0, responseMiddleware_1.sendResponse)(res, error.statusCode, "Validation error");
                     }
-                    return res.status(500).json({ message: error.message, status: 500 });
+                    return (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
                 }
-                return res.status(500).json({ message: "Failed to create a product", status: 500 });
+                else {
+                    return (0, responseMiddleware_1.sendResponse)(res, 500, "Failed to create a product");
+                }
             }
         });
         this.updateOne_product = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const product_id = req.params["product_id"];
-                if (!(0, mongoose_1.isValidObjectId)(product_id)) {
-                    res.status(400).json({ status: "failed", message: "Invalid product ID" });
-                    return;
-                }
-                ;
                 const productUpdate = yield ProductsSchema_1.default.findOneAndUpdate({ _id: product_id }, { $set: req.body }, { new: true });
-                if (!productUpdate) {
-                    res.status(404).json({ status: "failed", msg: "product not found !" });
-                }
-                const isUpdated = productUpdate !== null;
-                if (isUpdated) {
-                    res.status(204).json({ status: "success !", data: productUpdate });
-                    return;
-                }
-                else {
-                    res.status(500).json({ message: "Failed to update product" });
-                }
+                if (!productUpdate)
+                    return (0, responseMiddleware_1.sendResponse)(res, 404, "Product not found!");
+                (0, responseMiddleware_1.sendResponse)(res, 204, "Success!", productUpdate);
             }
             catch (error) {
-                res.status(500).json({ status: "Internal server error", msg: error });
+                if (error instanceof CustomErrorHandling_1.CustomError) {
+                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
+                }
+                else {
+                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal Server Error");
+                }
             }
         });
         this.updateMany_product = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const product_id = req.params["product_id"];
-                if (!(0, mongoose_1.isValidObjectId)(product_id)) {
-                    res.status(400).json({ status: "failed", message: "Invalid product ID" });
-                }
-                ;
                 const product = yield ProductsSchema_1.default.updateOne({ _id: product_id }, { $set: req.body });
                 if (product.modifiedCount === 0) {
-                    res.status(500).json({ status: "failed updating a document", msg: "updated product failed ..." });
+                    return (0, responseMiddleware_1.sendResponse)(res, 404, "Product not found or no changes made");
                 }
-                res.status(204).json({ status: "success !" });
+                (0, responseMiddleware_1.sendResponse)(res, 200, "Success!", product);
             }
             catch (error) {
-                res.status(500).json({ status: "failed ", msg: error });
+                if (error instanceof CustomErrorHandling_1.CustomError) {
+                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
+                }
+                else {
+                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal Server Error");
+                }
             }
         });
         this.remove_product = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const product_id = req.params["product_id"];
-                if (!(0, mongoose_1.isValidObjectId)(product_id)) {
-                    return res.status(400).json({ status: "failed", message: "Invalid product ID" });
-                }
                 const product = yield ProductsSchema_1.default.deleteOne({ _id: product_id });
-                if (product.deletedCount === 0) {
-                    res.status(404).json({ status: "Failed ", message: "product not found" });
-                }
-                ;
-                res.status(204).json({ status: "success in deletion of traxi a doc !" });
+                if (product.deletedCount === 0)
+                    return (0, responseMiddleware_1.sendResponse)(res, 404, "Product not found or already deleted");
+                (0, responseMiddleware_1.sendResponse)(res, 204, "Success in deletion of the product!");
             }
             catch (error) {
-                res.status(500).json({ status: "Internal Server Error", msg: error });
+                if (error instanceof CustomErrorHandling_1.CustomError) {
+                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
+                }
+                else {
+                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal Server Error");
+                }
             }
         });
     }

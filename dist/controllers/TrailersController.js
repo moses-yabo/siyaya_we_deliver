@@ -14,114 +14,109 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.trailerController = void 0;
 const TrailerSchema_1 = __importDefault(require("../models/TrailerSchema"));
-const mongoose_1 = require("mongoose");
+const responseMiddleware_1 = require("../middlewares/responseMiddleware");
+const CustomErrorHandling_1 = require("../utils/CustomErrorHandling");
 class TrailersController {
     constructor() {
         this.get_all_available_trailers = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const trailers = yield TrailerSchema_1.default.find({});
                 if (trailers.length === 0)
-                    return res.status(404).json({ status: "Users Not Found !", code: 404 });
-                res.status(200).json({ status: "success !!", data: trailers });
+                    return (0, responseMiddleware_1.sendResponse)(res, 404, "Trailers Not Found!");
+                (0, responseMiddleware_1.sendResponse)(res, 200, "Success!", trailers);
             }
             catch (error) {
-                if (error instanceof Error) {
-                    res.status(500).json({ status: "Internal Server Error", msg: error.message });
+                if (error instanceof CustomErrorHandling_1.CustomError) {
+                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
+                }
+                else {
+                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal Server Error");
                 }
             }
         });
         this.get_trailer_by_id = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const trailerId = req.params["trailer_id"];
-                if (!(0, mongoose_1.isValidObjectId)(trailerId))
-                    return res.status(400).json({ status: "failed", message: "Invalid trailer ID" });
                 const trailer = yield TrailerSchema_1.default.findById(trailerId);
-                console.log(trailer);
                 if (!trailer)
-                    return res.status(404).json({ status: "trailer not found" });
-                res.status(200).json({ status: "success", data: trailer });
+                    return (0, responseMiddleware_1.sendResponse)(res, 404, "Trailer not found");
+                (0, responseMiddleware_1.sendResponse)(res, 200, "Success!", trailer);
             }
             catch (error) {
-                res.status(500).json({ status: "Failed", msg: "500 internal server Error", error });
+                if (error instanceof CustomErrorHandling_1.CustomError) {
+                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
+                }
+                else {
+                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal Server Error");
+                }
             }
         });
         this.add_trailer = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const trailer = yield TrailerSchema_1.default.create(req.body);
-                return res.status(201).json({ message: "Created a trailer", status: 201, data: trailer });
+                return (0, responseMiddleware_1.sendResponse)(res, 201, "Created a trailer", trailer);
             }
             catch (error) {
-                if (error instanceof Error) {
+                if (error instanceof CustomErrorHandling_1.CustomError) {
                     if (error.name === 'ValidationError') {
-                        return res.status(400).json({ message: "Validation error: " + error.message, status: 400 });
+                        return (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
                     }
-                    return res.status(500).json({ message: error.message, status: 500 });
+                    return (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
                 }
-                return res.status(500).json({ message: "Failed to create a trailer", status: 500 });
+                else {
+                    return (0, responseMiddleware_1.sendResponse)(res, 500, "Failed to create a trailer");
+                }
             }
         });
         this.updateOne_trailer = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const trailer_id = req.params["trailer_id"];
-                if (!(0, mongoose_1.isValidObjectId)(trailer_id)) {
-                    res.status(400).json({ status: "failed", message: "Invalid trailer ID" });
-                    return;
-                }
-                ;
                 const trailerUpdate = yield TrailerSchema_1.default.findOneAndUpdate({ _id: trailer_id }, { $set: req.body }, { new: true });
-                if (!trailerUpdate) {
-                    res.status(404).json({ status: "failed", msg: "trailer not found !" });
-                }
-                const isUpdated = trailerUpdate !== null;
-                if (isUpdated) {
-                    res.status(204).json({ status: "success !", data: trailerUpdate });
-                    return;
-                }
-                else {
-                    res.status(500).json({ message: "Failed to update user" });
-                }
+                if (!trailerUpdate)
+                    return (0, responseMiddleware_1.sendResponse)(res, 404, "Trailer not found!");
+                (0, responseMiddleware_1.sendResponse)(res, 200, "Success! Trailer updated", trailerUpdate);
             }
             catch (error) {
-                if (error instanceof Error) {
-                    res.status(500).json({ status: "Internal server error", msg: error.message });
+                if (error instanceof CustomErrorHandling_1.CustomError) {
+                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
+                }
+                else {
+                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal Server Error");
                 }
             }
         });
         this.updateMany_trailer = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const trailer_id = req.params["trailer_id"];
-                if (!(0, mongoose_1.isValidObjectId)(trailer_id)) {
-                    res.status(400).json({ status: "failed", message: "Invalid user ID" });
-                }
-                ;
                 const trailer = yield TrailerSchema_1.default.updateOne({ _id: trailer_id }, { $set: req.body });
-                if (trailer.modifiedCount === 0) {
-                    res.status(500).json({ status: "failed updating a document", msg: "updated booking failed ..." });
-                }
-                res.status(204).json({ status: "success !" });
+                if (trailer.modifiedCount === 0)
+                    return (0, responseMiddleware_1.sendResponse)(res, 404, "Trailer not found or no changes made");
+                (0, responseMiddleware_1.sendResponse)(res, 200, "Success! Trailer updated");
             }
             catch (error) {
-                if (error instanceof Error) {
-                    res.status(500).json({ status: "failed ", msg: error.message });
+                if (error instanceof CustomErrorHandling_1.CustomError) {
+                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
+                }
+                else {
+                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal Server Error");
                 }
             }
         });
         this.remove_trailer = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const trailer_id = req.params["trailer_id"];
-                if (!(0, mongoose_1.isValidObjectId)(trailer_id)) {
-                    return res.status(400).json({ status: "failed", message: "Invalid trailerr ID" });
-                }
-                const user = yield TrailerSchema_1.default.deleteOne({ _id: trailer_id });
-                if (user.deletedCount === 0) {
-                    res.status(404).json({ status: "Failed ", message: "User not found" });
-                }
-                ;
-                res.status(204).json({ status: "success in deletion of trailer a doc !" });
+                const trailer = yield TrailerSchema_1.default.deleteOne({ _id: trailer_id });
+                if (trailer.deletedCount === 0)
+                    return (0, responseMiddleware_1.sendResponse)(res, 404, "Trailer not found or already deleted");
+                (0, responseMiddleware_1.sendResponse)(res, 200, "Success! Trailer deleted");
             }
             catch (error) {
-                if (error instanceof Error)
-                    res.status(500).json({ status: "Internal Server Error", msg: error });
+                if (error instanceof CustomErrorHandling_1.CustomError) {
+                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
+                }
+                else {
+                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal Server Error");
+                }
             }
         });
     }

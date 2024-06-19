@@ -1,137 +1,106 @@
 import ProductsModel from "../models/ProductsSchema";
-import { RequestHandler} from "express";
-import { Products} from "../types/productsTypes";
-import { isValidObjectId } from "mongoose";
+import { RequestHandler } from "express";
+import { Products } from "../types/productsTypes";
+import { sendResponse } from "../middlewares/responseMiddleware";
+import { CustomError } from "../utils/CustomErrorHandling";
 
 class ProductController {
-  public  get_all_products:RequestHandler = async(req,res)=>{
-    
+  
+  public get_all_products: RequestHandler = async (req, res) => {
     try {
-        const products:Products[] = await ProductsModel.find({}); 
-        if(products.length === 0) return res.status(404).json({status:"product Not Found !",code:404});
-      
-        res.status(200).json({status:"success !!",data:products});
-        
-      } catch (error) {
-      
-        res.status(500).json({status:"Internal Server Error",msg:error});
-      }
-    } 
-  
-  
-  
-  public get_product_by_id:RequestHandler = async (req,res) =>{
-     
-    try {
-        const product_id  = req.params["product_id"];
-        if(!isValidObjectId(product_id)) return res.status(400).json({ status: "failed", message: "Invalid product ID" });
-        const product = await ProductsModel.findById(product_id);
-        
-        if(!product) return  res.status(404).json({status:"product not found"});
-        
-        res.status(200).json({status:"success",data:product});
-  
-      } catch (error) {
-        res.status(500).json({status:"Failed",msg:"500 internal server Error",error});
+      const products: Products[] = await ProductsModel.find({});
+      if (products.length === 0) return sendResponse(res, 404, "Products Not Found!");
+      sendResponse(res, 200, "Success!", products);
+    } catch (error) {
+      if (error instanceof CustomError) {
+        sendResponse(res, error.statusCode, error.message);
+      } else {
+        sendResponse(res, 500, "Internal Server Error");
       }
     }
-  
-  
-  public create_product:RequestHandler = async(req,res)=>{
-    
-    try {
-  
-        const product = await ProductsModel.create(req.body);
-  
-     return res.status(201).json({ message: "Created a productr", status: 201,data:product });
-  
-    } catch (error:unknown) {
-  
-         if (error instanceof Error) {
-             if (error.name === 'ValidationError') {
-                 return res.status(400).json({ message: "Validation error: " + error.message, status: 400 });
-             }
-             return res.status(500).json({ message: error.message, status: 500 });
-  
-         }    
-     
-  
-     return res.status(500).json({ message: "Failed to create a product", status: 500 });
   }
-    } 
-  
-  
-  public updateOne_product:RequestHandler = async (req,res):Promise<void>=>{
-     
+
+  public get_product_by_id: RequestHandler = async (req, res) => {
     try {
-        const  product_id  = req.params["product_id"];  
-      
-        if(!isValidObjectId(product_id)) {
-          res.status(400).json({ status: "failed", message: "Invalid product ID" });
-          return;
-        };
-      
-        const productUpdate = await ProductsModel.findOneAndUpdate({_id:product_id},{$set:req.body},{new:true});
-  
-        if (!productUpdate) {res.status(404).json({status:"failed",msg:"product not found !"});}
-        
-        const isUpdated = productUpdate !== null;
-        
-        if (isUpdated) { 
-          res.status(204).json({status:"success !",data:productUpdate});
-          return;
-  
-        }else{
-           res.status(500).json({ message: "Failed to update product" });
-        }
-  
-        } catch (error) {
-          res.status(500).json({status:"Internal server error",msg:error});
-        }
-    } 
-  
-  public updateMany_product:RequestHandler = async(req,res)=>{
-  
-    try {
-    
-        const  product_id  = req.params["product_id"];
-    
-        if(!isValidObjectId(product_id)) {
-          res.status(400).json({ status: "failed", message: "Invalid product ID" })
-        };
-  
-     const product = await ProductsModel.updateOne({_id:product_id},{$set:req.body});
-        
-     if (product.modifiedCount === 0) {
-      res.status(500).json({status:"failed updating a document",msg:"updated product failed ..."});
-    }
-      
-      res.status(204).json({status:"success !"});
-  
-      } catch (error) {
-        res.status(500).json({status:"failed ",msg:error});
+      const product_id = req.params["product_id"];
+      const product = await ProductsModel.findById(product_id);
+      if (!product) return sendResponse(res, 404, "Product not found");
+      sendResponse(res, 200, "Success!", product);
+    } catch (error) {
+      if (error instanceof CustomError) {
+        sendResponse(res, error.statusCode, error.message);
+      } else {
+        sendResponse(res, 500, "Internal Server Error");
       }
-    } 
-  
-  
-  public remove_product:RequestHandler = async(req,res)=>{
-  
+    }
+  }
+
+  public create_product: RequestHandler = async (req, res) => {
     try {
-        const  product_id  = req.params["product_id"];
-        
-        if (!isValidObjectId(product_id)) {
-          return res.status(400).json({ status: "failed", message: "Invalid product ID" });
+      const product = await ProductsModel.create(req.body);
+      return sendResponse(res, 201, "Created a product", product);
+    } catch (error) {
+      if (error instanceof CustomError) {
+        if (error.name === 'ValidationError') {
+          return sendResponse(res, error.statusCode, "Validation error");
         }
-  
-        const product = await ProductsModel.deleteOne({_id:product_id});
-        if(product.deletedCount === 0){ res.status(404).json({status:"Failed ",message:"product not found"}) };
-  
-        res.status(204).json({status:"success in deletion of traxi a doc !"});
-  
-      } catch (error) {
-          res.status(500).json({status:"Internal Server Error",msg:error});
-        }
-      
-  }  
+        return sendResponse(res, error.statusCode, error.message);
+      } else {
+        return sendResponse(res, 500, "Failed to create a product");
+      }
+    }
+  }
+
+  public updateOne_product: RequestHandler = async (req, res) => {
+    try {
+      const product_id = req.params["product_id"];
+      const productUpdate = await ProductsModel.findOneAndUpdate(
+        { _id: product_id },
+        { $set: req.body },
+        { new: true }
+      );
+      if (!productUpdate) return sendResponse(res, 404, "Product not found!");
+      sendResponse(res, 204, "Success!", productUpdate);
+    } catch (error) {
+      if (error instanceof CustomError) {
+        sendResponse(res, error.statusCode, error.message);
+      } else {
+        sendResponse(res, 500, "Internal Server Error");
+      }
+    }
+  }
+
+  public updateMany_product: RequestHandler = async (req, res) => {
+    try {
+      const product_id = req.params["product_id"];
+      const product = await ProductsModel.updateOne({ _id: product_id }, { $set: req.body });
+      if (product.modifiedCount === 0) {
+        return sendResponse(res, 404, "Product not found or no changes made");
+      }
+      sendResponse(res, 200, "Success!", product);
+    } catch (error) {
+      if (error instanceof CustomError) {
+        sendResponse(res, error.statusCode, error.message);
+      } else {
+        sendResponse(res, 500, "Internal Server Error");
+      }
+    }
+  }
+
+  public remove_product: RequestHandler = async (req, res) => {
+    try {
+      const product_id = req.params["product_id"];
+      const product = await ProductsModel.deleteOne({ _id: product_id });
+      if (product.deletedCount === 0) return sendResponse(res, 404, "Product not found or already deleted");
+      sendResponse(res, 204, "Success in deletion of the product!");
+    } catch (error) {
+      if (error instanceof CustomError) {
+        sendResponse(res, error.statusCode, error.message);
+      } else {
+        sendResponse(res, 500, "Internal Server Error");
+      }
+    }
+  }
 }
+
 export const productController = new ProductController();

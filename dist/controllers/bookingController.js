@@ -14,106 +14,112 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.bookingController = void 0;
 const BookingSchema_1 = __importDefault(require("../models/BookingSchema"));
-const mongoose_1 = require("mongoose");
+const responseMiddleware_1 = require("../middlewares/responseMiddleware");
+const CustomErrorHandling_1 = require("../utils/CustomErrorHandling");
 class BookingController {
     constructor() {
         this.get_all_bookings = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const taxi_booking = yield BookingSchema_1.default.find({});
                 if (taxi_booking.length === 0)
-                    return res.status(404).json({ status: "booking Not Found !", code: 404 });
-                res.status(200).json({ status: "success !!", data: taxi_booking });
+                    return (0, responseMiddleware_1.sendResponse)(res, 404, "booking Not Found !");
+                (0, responseMiddleware_1.sendResponse)(res, 200, "success !!", taxi_booking);
             }
             catch (error) {
-                res.status(500).json({ status: "Internal Server Error", msg: error });
+                if (error instanceof CustomErrorHandling_1.CustomError) {
+                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
+                }
+                else {
+                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal Server Error");
+                }
             }
         });
         this.get_booking_by_id = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const booking_id = req.params["booking_id"];
-                if (!(0, mongoose_1.isValidObjectId)(booking_id))
-                    return res.status(400).json({ status: "failed", message: "Invalid booking ID" });
                 const booking = yield BookingSchema_1.default.findById(booking_id);
                 if (!booking)
-                    return res.status(404).json({ status: "booking not found" });
-                res.status(200).json({ status: "success", data: booking });
+                    return (0, responseMiddleware_1.sendResponse)(res, 404, "booking not found", booking);
+                (0, responseMiddleware_1.sendResponse)(res, 200, "success", booking);
             }
             catch (error) {
-                res.status(500).json({ status: "Failed", msg: "500 internal server Error", error });
+                if (error instanceof CustomErrorHandling_1.CustomError) {
+                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
+                }
+                else {
+                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal Server Error");
+                }
             }
         });
         this.create_booking = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const booking = yield BookingSchema_1.default.create(req.body);
-                return res.status(201).json({ message: "Created a bookingr", status: 201, data: booking });
+                return (0, responseMiddleware_1.sendResponse)(res, 201, "Created a Booking", booking);
             }
             catch (error) {
-                if (error instanceof Error) {
+                if (error instanceof CustomErrorHandling_1.CustomError) {
                     if (error.name === 'ValidationError') {
-                        return res.status(400).json({ message: "Validation error: " + error.message, status: 400 });
+                        return (0, responseMiddleware_1.sendResponse)(res, error.statusCode, "Validation error");
                     }
-                    return res.status(500).json({ message: error.message, status: 500 });
+                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
                 }
-                return res.status(500).json({ message: "Failed to create a booking", status: 500 });
+                else {
+                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal Server Error");
+                }
             }
         });
         this.updateOne_booking = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const booking_id = req.params["booking_id"];
-                if (!(0, mongoose_1.isValidObjectId)(booking_id)) {
-                    res.status(400).json({ status: "failed", message: "Invalid booking ID" });
-                    return;
-                }
-                ;
                 const bookingUpdate = yield BookingSchema_1.default.findOneAndUpdate({ _id: booking_id }, { $set: req.body }, { new: true });
                 if (!bookingUpdate) {
-                    res.status(404).json({ status: "failed", msg: "booking not found !" });
+                    return (0, responseMiddleware_1.sendResponse)(res, 404, "booking not found !");
                 }
-                const isUpdated = bookingUpdate !== null;
-                if (isUpdated) {
-                    res.status(204).json({ status: "success !", data: bookingUpdate });
-                    return;
-                }
-                else {
-                    res.status(500).json({ message: "Failed to update booking" });
-                }
+                (0, responseMiddleware_1.sendResponse)(res, 204, "success ! updated booking");
             }
             catch (error) {
-                res.status(500).json({ status: "Internal server error", msg: error });
+                if (error instanceof CustomErrorHandling_1.CustomError) {
+                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
+                }
+                else {
+                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal server error");
+                }
             }
         });
         this.updateMany_booking = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const booking_id = req.params["booking_id"];
-                if (!(0, mongoose_1.isValidObjectId)(booking_id)) {
-                    res.status(400).json({ status: "failed", message: "Invalid booking ID" });
-                }
-                ;
                 const booking = yield BookingSchema_1.default.updateOne({ _id: booking_id }, { $set: req.body });
                 if (booking.modifiedCount === 0) {
-                    res.status(500).json({ status: "failed updating a document", msg: "updated booking failed ..." });
+                    return (0, responseMiddleware_1.sendResponse)(res, 404, "booking not found or no changes made");
                 }
-                res.status(204).json({ status: "success !" });
+                (0, responseMiddleware_1.sendResponse)(res, 200, "success updated a booking");
             }
             catch (error) {
-                res.status(500).json({ status: "failed ", msg: error });
+                if (error instanceof CustomErrorHandling_1.CustomError) {
+                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
+                }
+                else {
+                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal server error");
+                }
             }
         });
         this.remove_booking = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const booking_id = req.params["booking_id"];
-                if (!(0, mongoose_1.isValidObjectId)(booking_id)) {
-                    return res.status(400).json({ status: "failed", message: "Invalid booking ID" });
-                }
                 const booking = yield BookingSchema_1.default.deleteOne({ _id: booking_id });
                 if (booking.deletedCount === 0) {
-                    res.status(404).json({ status: "Failed ", message: "booking not found" });
+                    return (0, responseMiddleware_1.sendResponse)(res, 404, "booking not found or already deleted");
                 }
-                ;
-                res.status(204).json({ status: "success in deletion of traxi a doc !" });
+                (0, responseMiddleware_1.sendResponse)(res, 204, "success in deletion of booking");
             }
             catch (error) {
-                res.status(500).json({ status: "Internal Server Error", msg: error });
+                if (error instanceof CustomErrorHandling_1.CustomError) {
+                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
+                }
+                else {
+                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal server error");
+                }
             }
         });
     }

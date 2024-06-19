@@ -1,6 +1,6 @@
-import express,{ Router } from 'express';
+import { Router } from 'express';
 import { productController } from '../controllers/ProductsController';
-
+import { validateObjectId } from "../middlewares/validationMiddleware";
 
 
 const { create_product,get_all_products,get_product_by_id,remove_product,updateOne_product,updateMany_product} = productController;
@@ -19,10 +19,10 @@ class BookingRouter {
     .post(create_product);
     this.route
     .route("/:product_id")
-    .get(get_product_by_id)
-    .put(updateMany_product)
-    .patch(updateOne_product)
-    .delete(remove_product);
+    .get(validateObjectId("product_id"),get_product_by_id)
+    .put(validateObjectId("product_id"),updateMany_product)
+    .patch(validateObjectId("product_id"),updateOne_product)
+    .delete(validateObjectId("product_id"),remove_product);
   }
 }
 

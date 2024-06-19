@@ -13,107 +13,110 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.taxiController = void 0;
+const responseMiddleware_1 = require("../middlewares/responseMiddleware");
 const TaxiSchema_1 = __importDefault(require("../models/TaxiSchema"));
-const mongoose_1 = require("mongoose");
+const CustomErrorHandling_1 = require("../utils/CustomErrorHandling");
 class TaxiController {
     constructor() {
         this.get_all_available_taxi = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const taxis = yield TaxiSchema_1.default.find({});
                 if (taxis.length === 0)
-                    return res.status(404).json({ status: "Users Not Found !", code: 404 });
-                res.status(200).json({ status: "success !!", data: taxis });
+                    return (0, responseMiddleware_1.sendResponse)(res, 404, "Taxis Not Found!");
+                (0, responseMiddleware_1.sendResponse)(res, 200, "Success!", taxis);
             }
             catch (error) {
-                res.status(500).json({ status: "Internal Server Error", msg: error });
+                if (error instanceof CustomErrorHandling_1.CustomError) {
+                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
+                }
+                else {
+                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal Server Error");
+                }
             }
         });
         this.get_taxi_by_id = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const taxi_id = req.params["trailer_id"];
-                if (!(0, mongoose_1.isValidObjectId)(taxi_id))
-                    return res.status(400).json({ status: "failed", message: "Invalid Taxi ID" });
+                const taxi_id = req.params["taxi_id"];
                 const taxi = yield TaxiSchema_1.default.findById(taxi_id);
                 if (!taxi)
-                    return res.status(404).json({ status: "Taxi not found" });
-                res.status(200).json({ status: "success", data: taxi });
+                    return (0, responseMiddleware_1.sendResponse)(res, 404, "Taxi not found");
+                (0, responseMiddleware_1.sendResponse)(res, 200, "Success!", taxi);
             }
             catch (error) {
-                res.status(500).json({ status: "Failed", msg: "500 internal server Error", error });
+                if (error instanceof CustomErrorHandling_1.CustomError) {
+                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
+                }
+                else {
+                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal Server Error");
+                }
             }
         });
         this.add_taxi = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const taxi = yield TaxiSchema_1.default.create(req.body);
-                return res.status(201).json({ message: "Created a taxir", status: 201, data: taxi });
+                return (0, responseMiddleware_1.sendResponse)(res, 201, "Created a taxi", taxi);
             }
             catch (error) {
-                if (error instanceof Error) {
+                if (error instanceof CustomErrorHandling_1.CustomError) {
                     if (error.name === 'ValidationError') {
-                        return res.status(400).json({ message: "Validation error: " + error.message, status: 400 });
+                        return (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
                     }
-                    return res.status(500).json({ message: error.message, status: 500 });
+                    return (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
                 }
-                return res.status(500).json({ message: "Failed to create a taxi", status: 500 });
+                else {
+                    return (0, responseMiddleware_1.sendResponse)(res, 500, "Failed to create a taxi");
+                }
             }
         });
         this.updateOne_taxi = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const taxi_id = req.params["taxi_id"];
-                if (!(0, mongoose_1.isValidObjectId)(taxi_id)) {
-                    res.status(400).json({ status: "failed", message: "Invalid taxi ID" });
-                    return;
-                }
-                ;
-                const trailerUpdate = yield TaxiSchema_1.default.findOneAndUpdate({ _id: taxi_id }, { $set: req.body }, { new: true });
-                if (!trailerUpdate) {
-                    res.status(404).json({ status: "failed", msg: "taxi not found !" });
-                }
-                const isUpdated = trailerUpdate !== null;
-                if (isUpdated) {
-                    res.status(204).json({ status: "success !", data: trailerUpdate });
-                    return;
-                }
-                else {
-                    res.status(500).json({ message: "Failed to update taxi" });
-                }
+                const taxiUpdate = yield TaxiSchema_1.default.findOneAndUpdate({ _id: taxi_id }, { $set: req.body }, { new: true });
+                if (!taxiUpdate)
+                    return (0, responseMiddleware_1.sendResponse)(res, 404, "Taxi not found!");
+                (0, responseMiddleware_1.sendResponse)(res, 200, "Success! Taxi updated", taxiUpdate);
             }
             catch (error) {
-                res.status(500).json({ status: "Internal server error", msg: error });
+                if (error instanceof CustomErrorHandling_1.CustomError) {
+                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
+                }
+                else {
+                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal Server Error");
+                }
             }
         });
         this.updateMany_taxi = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const taxi_id = req.params["taxi_id"];
-                if (!(0, mongoose_1.isValidObjectId)(taxi_id)) {
-                    res.status(400).json({ status: "failed", message: "Invalid taxi ID" });
-                }
-                ;
-                const trailer = yield TaxiSchema_1.default.updateOne({ _id: taxi_id }, { $set: req.body });
-                if (trailer.modifiedCount === 0) {
-                    res.status(500).json({ status: "failed updating a document", msg: "updated booking failed ..." });
-                }
-                res.status(204).json({ status: "success !" });
+                const taxi = yield TaxiSchema_1.default.updateOne({ _id: taxi_id }, { $set: req.body });
+                if (taxi.modifiedCount === 0)
+                    return (0, responseMiddleware_1.sendResponse)(res, 404, "Taxi not found or no changes made");
+                (0, responseMiddleware_1.sendResponse)(res, 200, "Success! Taxi updated");
             }
             catch (error) {
-                res.status(500).json({ status: "failed ", msg: error });
+                if (error instanceof CustomErrorHandling_1.CustomError) {
+                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
+                }
+                else {
+                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal Server Error");
+                }
             }
         });
         this.remove_taxi = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const taxi_id = req.params["taxi_id"];
-                if (!(0, mongoose_1.isValidObjectId)(taxi_id)) {
-                    return res.status(400).json({ status: "failed", message: "Invalid taxi ID" });
-                }
-                const user = yield TaxiSchema_1.default.deleteOne({ _id: taxi_id });
-                if (user.deletedCount === 0) {
-                    res.status(404).json({ status: "Failed ", message: "taxi not found" });
-                }
-                ;
-                res.status(204).json({ status: "success in deletion of traxi a doc !" });
+                const taxi = yield TaxiSchema_1.default.deleteOne({ _id: taxi_id });
+                if (taxi.deletedCount === 0)
+                    return (0, responseMiddleware_1.sendResponse)(res, 404, "Taxi not found or already deleted");
+                (0, responseMiddleware_1.sendResponse)(res, 200, "Success! Taxi deleted");
             }
             catch (error) {
-                res.status(500).json({ status: "Internal Server Error", msg: error });
+                if (error instanceof CustomErrorHandling_1.CustomError) {
+                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
+                }
+                else {
+                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal Server Error");
+                }
             }
         });
     }

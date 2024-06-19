@@ -9,7 +9,6 @@ const errorhandler_1 = __importDefault(require("errorhandler"));
 const node_notifier_1 = __importDefault(require("node-notifier"));
 const openApi_json_1 = __importDefault(require("../openApi.json"));
 const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
-const CustomErrorHandling_1 = require("../utils/CustomErrorHandling");
 const bookTaxiRoutes_1 = __importDefault(require("../routes/bookTaxiRoutes"));
 const ShippingRoutes_1 = __importDefault(require("../routes/ShippingRoutes"));
 const rentTrailerRoutes_1 = __importDefault(require("../routes/rentTrailerRoutes"));
@@ -55,15 +54,6 @@ class QuanterMiddlewares {
         }
         this.app.use(express_1.default.urlencoded({ extended: false }));
         this.app.use(express_1.default.json());
-        //example routes
-        this.app.get('/error/custom', (req, res, next) => {
-            const error = new CustomErrorHandling_1.CustomError('Custom error message', 400);
-            next(error);
-        });
-        this.app.get('/error/generic', (req, res, next) => {
-            const error = new Error('Generic error message');
-            next(error);
-        });
         this.app.use("/api/books", bookTaxiRoutes_1.default);
         this.app.use("/api/shipp", ShippingRoutes_1.default);
         this.app.use("/api/rent", rentTrailerRoutes_1.default);

@@ -14,106 +14,109 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.shippingController = void 0;
 const ShippingSchema_1 = __importDefault(require("../models/ShippingSchema"));
-const mongoose_1 = require("mongoose");
+const responseMiddleware_1 = require("../middlewares/responseMiddleware");
+const CustomErrorHandling_1 = require("../utils/CustomErrorHandling");
 class ShippingController {
     constructor() {
         this.get_all_shippings = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const shippings = yield ShippingSchema_1.default.find({});
                 if (shippings.length === 0)
-                    return res.status(404).json({ status: "shipping Not Found !", code: 404 });
-                res.status(200).json({ status: "success !!", data: shippings });
+                    return (0, responseMiddleware_1.sendResponse)(res, 404, "Shippings Not Found!");
+                (0, responseMiddleware_1.sendResponse)(res, 200, "Success!", shippings);
             }
             catch (error) {
-                res.status(500).json({ status: "Internal Server Error", msg: error });
+                if (error instanceof CustomErrorHandling_1.CustomError) {
+                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
+                }
+                else {
+                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal Server Error");
+                }
             }
         });
         this.get_shipping_by_id = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const shipping_id = req.params["shipping_id"];
-                if (!(0, mongoose_1.isValidObjectId)(shipping_id))
-                    return res.status(400).json({ status: "failed", message: "Invalid shipping ID" });
                 const shipping = yield ShippingSchema_1.default.findById(shipping_id);
                 if (!shipping)
-                    return res.status(404).json({ status: "shipping not found" });
-                res.status(200).json({ status: "success", data: shipping });
+                    return (0, responseMiddleware_1.sendResponse)(res, 404, "Shipping not found");
+                (0, responseMiddleware_1.sendResponse)(res, 200, "Success!", shipping);
             }
             catch (error) {
-                res.status(500).json({ status: "Failed", msg: "500 internal server Error", error });
+                if (error instanceof CustomErrorHandling_1.CustomError) {
+                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
+                }
+                else {
+                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal Server Error");
+                }
             }
         });
         this.create_shipping = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const shipping = yield ShippingSchema_1.default.create(req.body);
-                return res.status(201).json({ message: "Created a shippingr", status: 201, data: shipping });
+                return (0, responseMiddleware_1.sendResponse)(res, 201, "Created a shipping", shipping);
             }
             catch (error) {
-                if (error instanceof Error) {
+                if (error instanceof CustomErrorHandling_1.CustomError) {
                     if (error.name === 'ValidationError') {
-                        return res.status(400).json({ message: "Validation error: " + error.message, status: 400 });
+                        return (0, responseMiddleware_1.sendResponse)(res, error.statusCode, "Validation error");
                     }
-                    return res.status(500).json({ message: error.message, status: 500 });
+                    return (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
                 }
-                return res.status(500).json({ message: "Failed to create a shipping", status: 500 });
+                else {
+                    return (0, responseMiddleware_1.sendResponse)(res, 500, "Failed to create a shipping");
+                }
             }
         });
         this.updateOne_shipping = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const shipping_id = req.params["shipping_id"];
-                if (!(0, mongoose_1.isValidObjectId)(shipping_id)) {
-                    res.status(400).json({ status: "failed", message: "Invalid shipping ID" });
-                    return;
-                }
-                ;
-                const trailerUpdate = yield ShippingSchema_1.default.findOneAndUpdate({ _id: shipping_id }, { $set: req.body }, { new: true });
-                if (!trailerUpdate) {
-                    res.status(404).json({ status: "failed", msg: "shipping not found !" });
-                }
-                const isUpdated = trailerUpdate !== null;
-                if (isUpdated) {
-                    res.status(204).json({ status: "success !", data: trailerUpdate });
-                    return;
-                }
-                else {
-                    res.status(500).json({ message: "Failed to update shipping" });
-                }
+                const shippingUpdate = yield ShippingSchema_1.default.findOneAndUpdate({ _id: shipping_id }, { $set: req.body }, { new: true });
+                if (!shippingUpdate)
+                    return (0, responseMiddleware_1.sendResponse)(res, 404, "Shipping not found!");
+                (0, responseMiddleware_1.sendResponse)(res, 200, "Success! Shipping updated", shippingUpdate);
             }
             catch (error) {
-                res.status(500).json({ status: "Internal server error", msg: error });
+                if (error instanceof CustomErrorHandling_1.CustomError) {
+                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
+                }
+                else {
+                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal Server Error");
+                }
             }
         });
         this.updateMany_shipping = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const shipping_id = req.params["shipping_id"];
-                if (!(0, mongoose_1.isValidObjectId)(shipping_id)) {
-                    res.status(400).json({ status: "failed", message: "Invalid shipping ID" });
-                }
-                ;
-                const trailer = yield ShippingSchema_1.default.updateOne({ _id: shipping_id }, { $set: req.body });
-                if (trailer.modifiedCount === 0) {
-                    res.status(500).json({ status: "failed updating a document", msg: "updated booking failed ..." });
-                }
-                res.status(204).json({ status: "success !" });
+                const shipping = yield ShippingSchema_1.default.updateOne({ _id: shipping_id }, { $set: req.body });
+                if (shipping.modifiedCount === 0)
+                    return (0, responseMiddleware_1.sendResponse)(res, 404, "Shipping not found or no changes made");
+                (0, responseMiddleware_1.sendResponse)(res, 200, "Success! Shipping updated");
             }
             catch (error) {
-                res.status(500).json({ status: "failed ", msg: error });
+                if (error instanceof CustomErrorHandling_1.CustomError) {
+                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
+                }
+                else {
+                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal Server Error");
+                }
             }
         });
         this.remove_shipping = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const taxi_id = req.params["taxi_id"];
-                if (!(0, mongoose_1.isValidObjectId)(taxi_id)) {
-                    return res.status(400).json({ status: "failed", message: "Invalid taxi ID" });
-                }
-                const user = yield ShippingSchema_1.default.deleteOne({ _id: taxi_id });
-                if (user.deletedCount === 0) {
-                    res.status(404).json({ status: "Failed ", message: "shipping not found" });
-                }
-                ;
-                res.status(204).json({ status: "success in deletion of traxi a doc !" });
+                const shipping_id = req.params["shipping_id"];
+                const user = yield ShippingSchema_1.default.deleteOne({ _id: shipping_id });
+                if (user.deletedCount === 0)
+                    return (0, responseMiddleware_1.sendResponse)(res, 404, "Shipping not found or already deleted");
+                (0, responseMiddleware_1.sendResponse)(res, 200, "Success! Shipping deleted");
             }
             catch (error) {
-                res.status(500).json({ status: "Internal Server Error", msg: error });
+                if (error instanceof CustomErrorHandling_1.CustomError) {
+                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
+                }
+                else {
+                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal Server Error");
+                }
             }
         });
     }

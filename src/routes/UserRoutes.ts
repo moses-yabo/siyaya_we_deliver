@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { userController} from "../controllers/UsersController";
+import { validateObjectId } from "../middlewares/validationMiddleware";
 
 
 
@@ -19,10 +20,10 @@ class UserRouter {
         .post(add_user);
         this.router
         .route("/:user_id")
-        .get(get_user_by_id)
-        .put(updateMany_user)
-        .patch(updateOne_user)
-        .delete(remove_user);
+        .get(validateObjectId("user_id"),get_user_by_id)
+        .put(validateObjectId("user_id"),updateMany_user)
+        .patch(validateObjectId("user_id"),updateOne_user)
+        .delete(validateObjectId("user_id"),remove_user);
 
     }
 }

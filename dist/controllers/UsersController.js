@@ -14,32 +14,41 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.userController = void 0;
 const UserSchema_1 = __importDefault(require("../models/UserSchema"));
-const mongoose_1 = require("mongoose");
+const responseMiddleware_1 = require("../middlewares/responseMiddleware");
+const CustomErrorHandling_1 = require("../utils/CustomErrorHandling");
 class UserController {
     constructor() {
         this.get_all_available_users = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const users = yield UserSchema_1.default.find({});
                 if (users.length === 0)
-                    return res.status(404).json({ status: "Users Not Found!", code: 404 });
-                res.status(200).json({ status: "success !!", data: users });
+                    return (0, responseMiddleware_1.sendResponse)(res, 404, "Users Not Found!");
+                (0, responseMiddleware_1.sendResponse)(res, 200, "Success!", users);
             }
             catch (error) {
-                res.status(500).json({ status: "Internal Server Error", msg: error });
+                if (error instanceof CustomErrorHandling_1.CustomError) {
+                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
+                }
+                else {
+                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal Server Error");
+                }
             }
         });
         this.get_user_by_id = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const user_id = req.params["user_id"];
-                if (!(0, mongoose_1.isValidObjectId)(user_id))
-                    return res.status(400).json({ status: "failed", message: "Invalid user ID" });
                 const user = yield UserSchema_1.default.findById(user_id);
                 if (!user)
-                    return res.status(404).json({ status: "user not found", data: user });
-                res.status(200).json({ status: "success", data: user });
+                    return (0, responseMiddleware_1.sendResponse)(res, 404, "User not found");
+                (0, responseMiddleware_1.sendResponse)(res, 200, "Success!", user);
             }
             catch (error) {
-                res.status(500).json({ status: "Failed", msg: "500 internal server Error", error });
+                if (error instanceof CustomErrorHandling_1.CustomError) {
+                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
+                }
+                else {
+                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal Server Error");
+                }
             }
         });
         this.add_user = (req, res) => __awaiter(this, void 0, void 0, function* () {
@@ -47,75 +56,73 @@ class UserController {
                 const { email } = req.body;
                 const user_email = yield UserSchema_1.default.find({ email: email });
                 if (user_email.length > 0)
-                    return res.json({ msg: "user email has already been registered as a user" });
+                    return (0, responseMiddleware_1.sendResponse)(res, 409, "User email has already been registered");
                 const user = yield UserSchema_1.default.create(req.body);
-                return res.status(201).json({ message: "Created a user", status: 201, user });
+                return (0, responseMiddleware_1.sendResponse)(res, 201, "Created a user", user);
             }
             catch (error) {
-                if (error instanceof Error) {
+                if (error instanceof CustomErrorHandling_1.CustomError) {
                     if (error.name === 'ValidationError') {
-                        return res.status(400).json({ message: "Validation error: " + error.message, status: 400 });
+                        return (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
                     }
-                    return res.status(500).json({ message: error.message, status: 500 });
+                    return (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
                 }
-                return res.status(500).json({ message: "Failed to create a user", status: 500 });
+                else {
+                    return (0, responseMiddleware_1.sendResponse)(res, 500, "Failed to create a user");
+                }
             }
         });
         this.updateOne_user = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const user_id = req.params["user_id"];
-                if (!(0, mongoose_1.isValidObjectId)(user_id)) {
-                    res.status(400).json({ status: "failed", message: "Invalid user ID" });
-                    return;
-                }
-                ;
                 const user = yield UserSchema_1.default.findOneAndUpdate({ _id: user_id }, { $set: req.body }, { new: true });
-                if (!user) {
-                    res.status(404).json({ status: "failed", msg: "user not found!" });
-                    return;
-                }
-                res.status(200).json({ status: "success!", data: user });
+                if (!user)
+                    return (0, responseMiddleware_1.sendResponse)(res, 404, "User not found");
+                (0, responseMiddleware_1.sendResponse)(res, 200, "Success! User updated", user);
             }
             catch (error) {
-                res.status(500).json({ status: "Internal server error", msg: error });
+                if (error instanceof CustomErrorHandling_1.CustomError) {
+                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
+                }
+                else {
+                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal Server Error");
+                }
             }
         });
         this.updateMany_user = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const user_id = req.params["user_id"];
-                if (!(0, mongoose_1.isValidObjectId)(user_id)) {
-                    res.status(400).json({ status: "failed", message: "Invalid user ID" });
-                    return;
-                }
                 const user = yield UserSchema_1.default.updateOne({ _id: user_id }, { $set: req.body });
-                if (user.modifiedCount === 0) {
-                    res.status(500).json({ status: "failed updating a document", msg: "updated booking failed ..." });
-                    return;
-                }
-                res.status(200).json({ status: "success!" });
+                if (user.modifiedCount === 0)
+                    return (0, responseMiddleware_1.sendResponse)(res, 404, "User not found. Updating users failed.");
+                (0, responseMiddleware_1.sendResponse)(res, 200, "Success! User updated");
             }
             catch (error) {
-                res.status(500).json({ status: "failed", msg: error });
+                if (error instanceof CustomErrorHandling_1.CustomError) {
+                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
+                }
+                else {
+                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal Server Error");
+                }
             }
         });
         this.remove_user = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const user_id = req.params["user_id"];
-                if (!(0, mongoose_1.isValidObjectId)(user_id)) {
-                    return res.status(400).json({ status: "failed", message: "Invalid user ID" });
-                }
                 const user = yield UserSchema_1.default.deleteOne({ _id: user_id });
-                if (user.deletedCount === 0) {
-                    res.status(404).json({ status: "Failed", message: "User not found" });
-                    return;
-                }
-                res.status(204).json({ status: "success in deletion of a doc!" });
+                if (user.deletedCount === 0)
+                    return (0, responseMiddleware_1.sendResponse)(res, 404, "User not found");
+                (0, responseMiddleware_1.sendResponse)(res, 200, "Success! User deleted");
             }
             catch (error) {
-                res.status(500).json({ status: "Internal Server Error", msg: error });
+                if (error instanceof CustomErrorHandling_1.CustomError) {
+                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
+                }
+                else {
+                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal Server Error");
+                }
             }
         });
     }
 }
-;
 exports.userController = new UserController();

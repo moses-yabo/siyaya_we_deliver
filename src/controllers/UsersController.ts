@@ -1,119 +1,106 @@
-import { RequestHandler} from "express";
-import {IUser} from "../types/userTypes";
+import { RequestHandler } from "express";
+import { IUser } from "../types/userTypes";
 import UserModel from "../models/UserSchema";
-import { ObjectId } from "mongoose";
-import { isValidObjectId } from "mongoose";
+import { sendResponse } from "../middlewares/responseMiddleware";
+import { CustomError } from "../utils/CustomErrorHandling";
 
 class UserController {
-    
-    public get_all_available_users: RequestHandler = async (req, res) => {
-      try {
-        const users: IUser[] = await UserModel.find({});
-        if (users.length === 0) return res.status(404).json({ status: "Users Not Found!", code: 404 });
-        
-        res.status(200).json({ status: "success !!", data: users });
-      } catch (error) {
-        res.status(500).json({ status: "Internal Server Error", msg: error });
+  public get_all_available_users: RequestHandler = async (req, res) => {
+    try {
+      const users: IUser[] = await UserModel.find({});
+      if (users.length === 0) return sendResponse(res, 404, "Users Not Found!");
+      sendResponse(res, 200, "Success!", users);
+    } catch (error) {
+      if (error instanceof CustomError) {
+        sendResponse(res, error.statusCode, error.message);
+      } else {
+        sendResponse(res, 500, "Internal Server Error");
       }
     }
-  
-    public get_user_by_id: RequestHandler = async (req, res) => {
-      try {
-        const user_id = req.params["user_id"];
-        if (!isValidObjectId(user_id)) return res.status(400).json({ status: "failed", message: "Invalid user ID" });
-        const user = await UserModel.findById(user_id);
-        
-        if (!user) return res.status(404).json({ status: "user not found", data: user });
-        
-        res.status(200).json({ status: "success", data: user });
-      } catch (error) {
-        res.status(500).json({ status: "Failed", msg: "500 internal server Error", error });
+  }
+
+  public get_user_by_id: RequestHandler = async (req, res) => {
+    try {
+      const user_id = req.params["user_id"];
+      const user = await UserModel.findById(user_id);
+      if (!user) return sendResponse(res, 404, "User not found");
+      sendResponse(res, 200, "Success!", user);
+    } catch (error) {
+      if (error instanceof CustomError) {
+        sendResponse(res, error.statusCode, error.message);
+      } else {
+        sendResponse(res, 500, "Internal Server Error");
       }
     }
-  
-    public add_user: RequestHandler = async (req, res) => {
-      try {
-        const { email } = req.body;
-        const user_email = await UserModel.find({ email: email });
-      
-        if (user_email.length > 0) return res.json({ msg: "user email has already been registered as a user" });
-        const user = await UserModel.create(req.body);
-  
-        return res.status(201).json({ message: "Created a user", status: 201, user });
-      } catch (error: unknown) {
-        if (error instanceof Error) {
-          if (error.name === 'ValidationError') {
-            return res.status(400).json({ message: "Validation error: " + error.message, status: 400 });
-          }
-          return res.status(500).json({ message: error.message, status: 500 });
-        }    
-        
-        return res.status(500).json({ message: "Failed to create a user", status: 500 });
-      }
-    }
-  
-    public updateOne_user: RequestHandler = async (req, res): Promise<void> => {
-      try {
-        const user_id = req.params["user_id"];  
-      
-        if (!isValidObjectId(user_id)) {
-          res.status(400).json({ status: "failed", message: "Invalid user ID" });
-          return;
-        };
-      
-        const user = await UserModel.findOneAndUpdate({ _id: user_id }, { $set: req.body }, { new: true });
-  
-        if (!user) {
-          res.status(404).json({ status: "failed", msg: "user not found!" });
-          return;
+  }
+
+  public add_user: RequestHandler = async (req, res) => {
+    try {
+      const { email } = req.body;
+      const user_email = await UserModel.find({ email: email });
+      if (user_email.length > 0) return sendResponse(res, 409, "User email has already been registered");
+
+      const user = await UserModel.create(req.body);
+      return sendResponse(res, 201, "Created a user", user);
+    } catch (error: unknown) {
+      if (error instanceof CustomError) {
+        if (error.name === 'ValidationError') {
+          return sendResponse(res, error.statusCode, error.message);
         }
-        
-        res.status(200).json({ status: "success!", data: user });
-      } catch (error) {
-        res.status(500).json({ status: "Internal server error", msg: error });
+        return sendResponse(res, error.statusCode, error.message);
+      } else {
+        return sendResponse(res, 500, "Failed to create a user");
       }
     }
-  
-    public updateMany_user: RequestHandler = async (req, res) => {
-      try {
-        const user_id = req.params["user_id"];
-      
-        if (!isValidObjectId(user_id)) {
-          res.status(400).json({ status: "failed", message: "Invalid user ID" });
-          return;
-        }
-  
-        const user = await UserModel.updateOne({ _id: user_id }, { $set: req.body });
-        if (user.modifiedCount === 0) {
-          res.status(500).json({ status: "failed updating a document", msg: "updated booking failed ..." });
-          return;
-        }
-        
-        res.status(200).json({ status: "success!" });
-      } catch (error) {
-        res.status(500).json({ status: "failed", msg: error });
+  }
+
+  public updateOne_user: RequestHandler = async (req, res): Promise<void> => {
+    try {
+      const user_id = req.params["user_id"];
+      const user = await UserModel.findOneAndUpdate({ _id: user_id }, { $set: req.body }, { new: true });
+      if (!user) return sendResponse(res, 404, "User not found");
+
+      sendResponse(res, 200, "Success! User updated", user);
+    } catch (error) {
+      if (error instanceof CustomError) {
+        sendResponse(res, error.statusCode, error.message);
+      } else {
+        sendResponse(res, 500, "Internal Server Error");
       }
     }
-  
-    public remove_user: RequestHandler = async (req, res) => {
-      try {
-        const user_id = req.params["user_id"];
-        
-        if (!isValidObjectId(user_id)) {
-          return res.status(400).json({ status: "failed", message: "Invalid user ID" });
-        }
-  
-        const user = await UserModel.deleteOne({ _id: user_id });
-        if (user.deletedCount === 0) {
-          res.status(404).json({ status: "Failed", message: "User not found" });
-          return;
-        }
-  
-        res.status(204).json({ status: "success in deletion of a doc!" });
-      } catch (error) {
-        res.status(500).json({ status: "Internal Server Error", msg: error });
+  }
+
+  public updateMany_user: RequestHandler = async (req, res) => {
+    try {
+      const user_id = req.params["user_id"];
+      const user = await UserModel.updateOne({ _id: user_id }, { $set: req.body });
+      if (user.modifiedCount === 0) return sendResponse(res, 404, "User not found. Updating users failed.");
+
+      sendResponse(res, 200, "Success! User updated");
+    } catch (error) {
+      if (error instanceof CustomError) {
+        sendResponse(res, error.statusCode, error.message);
+      } else {
+        sendResponse(res, 500, "Internal Server Error");
       }
     }
-  };
-  
-  export const userController = new UserController();
+  }
+
+  public remove_user: RequestHandler = async (req, res) => {
+    try {
+      const user_id = req.params["user_id"];
+      const user = await UserModel.deleteOne({ _id: user_id });
+      if (user.deletedCount === 0) return sendResponse(res, 404, "User not found");
+
+      sendResponse(res, 200, "Success! User deleted");
+    } catch (error) {
+      if (error instanceof CustomError) {
+        sendResponse(res, error.statusCode, error.message);
+      } else {
+        sendResponse(res, 500, "Internal Server Error");
+      }
+    }
+  }
+}
+
+export const userController = new UserController();
