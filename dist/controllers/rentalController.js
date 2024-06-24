@@ -14,13 +14,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.rentalController = void 0;
 const responseMiddleware_1 = require("../middlewares/responseMiddleware");
-const RentalSchema_1 = __importDefault(require("../models/RentalSchema"));
 const CustomErrorHandling_1 = require("../utils/CustomErrorHandling");
+const rental_service_1 = require("../services/rental.service");
+const mongoose_1 = __importDefault(require("mongoose"));
 class RentalController {
     constructor() {
+        this._rentalServices = new rental_service_1.RentalServices();
         this.get_all_rentals = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const rentals = yield RentalSchema_1.default.find({});
+                const rentals = yield this._rentalServices.getAllRentals();
                 if (rentals.length === 0)
                     return (0, responseMiddleware_1.sendResponse)(res, 404, "Rentals Not Found!");
                 (0, responseMiddleware_1.sendResponse)(res, 200, "Success!", rentals);
@@ -37,7 +39,7 @@ class RentalController {
         this.get_rental_by_id = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const rental_id = req.params["rental_id"];
-                const rental = yield RentalSchema_1.default.findById(rental_id);
+                const rental = yield this._rentalServices.getRentalById(rental_id);
                 if (!rental)
                     return (0, responseMiddleware_1.sendResponse)(res, 404, "Rental not found");
                 (0, responseMiddleware_1.sendResponse)(res, 200, "Success!", rental);
@@ -53,14 +55,14 @@ class RentalController {
         });
         this.create_rental = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const rental = yield RentalSchema_1.default.create(req.body);
+                const rental = yield this._rentalServices.createRental(req.body);
                 return (0, responseMiddleware_1.sendResponse)(res, 201, "Created a rental", rental);
             }
             catch (error) {
-                if (error instanceof CustomErrorHandling_1.CustomError) {
-                    if (error.name === 'ValidationError') {
-                        return (0, responseMiddleware_1.sendResponse)(res, error.statusCode, "Validation error");
-                    }
+                if (error instanceof mongoose_1.default.Error.ValidationError) {
+                    return (0, responseMiddleware_1.sendResponse)(res, 400, error.message);
+                }
+                else if (error instanceof CustomErrorHandling_1.CustomError) {
                     return (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
                 }
                 else {
@@ -71,51 +73,51 @@ class RentalController {
         this.updateOne_rental = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const rental_id = req.params["rental_id"];
-                const trailerUpdate = yield RentalSchema_1.default.findOneAndUpdate({ _id: rental_id }, { $set: req.body }, { new: true });
-                if (!trailerUpdate)
+                const rentalUpdate = yield this._rentalServices.updateOneRentalById(rental_id, req.body);
+                if (!rentalUpdate)
                     return (0, responseMiddleware_1.sendResponse)(res, 404, "Rental not found!");
-                (0, responseMiddleware_1.sendResponse)(res, 200, "Success! Rental updated", trailerUpdate);
+                return (0, responseMiddleware_1.sendResponse)(res, 200, "Success! Rental updated", rentalUpdate);
             }
             catch (error) {
                 if (error instanceof CustomErrorHandling_1.CustomError) {
-                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
+                    return (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
                 }
                 else {
-                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal Server Error");
+                    return (0, responseMiddleware_1.sendResponse)(res, 500, "Internal Server Error");
                 }
             }
         });
         this.updateMany_rental = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const rental_id = req.params["rental_id"];
-                const trailer = yield RentalSchema_1.default.updateOne({ _id: rental_id }, { $set: req.body });
-                if (trailer.modifiedCount === 0)
+                const rental = yield this._rentalServices.updateManyRentalById(rental_id, req.body);
+                if (!rental)
                     return (0, responseMiddleware_1.sendResponse)(res, 404, "Rental not found or no changes made");
-                (0, responseMiddleware_1.sendResponse)(res, 200, "Success! Rental updated");
+                return (0, responseMiddleware_1.sendResponse)(res, 200, "Success! Rental updated");
             }
             catch (error) {
                 if (error instanceof CustomErrorHandling_1.CustomError) {
-                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
+                    return (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
                 }
                 else {
-                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal Server Error");
+                    return (0, responseMiddleware_1.sendResponse)(res, 500, "Internal Server Error");
                 }
             }
         });
         this.remove_rental = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const rental_id = req.params["rental_id"];
-                const rental = yield RentalSchema_1.default.deleteOne({ _id: rental_id });
-                if (rental.deletedCount === 0)
+                const rental = yield this._rentalServices.deleteRentalById(rental_id);
+                if (!rental)
                     return (0, responseMiddleware_1.sendResponse)(res, 404, "Rental not found or already deleted");
-                (0, responseMiddleware_1.sendResponse)(res, 200, "Success! Rental deleted");
+                return (0, responseMiddleware_1.sendResponse)(res, 200, "Success! Rental deleted");
             }
             catch (error) {
                 if (error instanceof CustomErrorHandling_1.CustomError) {
-                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
+                    return (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
                 }
                 else {
-                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal Server Error");
+                    return (0, responseMiddleware_1.sendResponse)(res, 500, "Internal Server Error");
                 }
             }
         });

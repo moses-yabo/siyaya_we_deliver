@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const dotenv_1 = require("dotenv");
-const middlewareConfig_1 = require("./middlware/middlewareConfig");
+const middlewareConfig_1 = require("./middlewares/middlewareConfig");
 const DbContext_1 = __importDefault(require("./Db/DbContext"));
 class ServerEntryPoint {
     constructor() {

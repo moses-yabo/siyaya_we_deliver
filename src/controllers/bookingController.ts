@@ -1,15 +1,20 @@
 import taxiBookingModel from "../models/BookingSchema";
 import { RequestHandler } from "express";
 import { TaxiBooking } from "../types/taxiTypes";
+import { IBookingController } from "../types/bookingControllerTypes";
 import { sendResponse } from "../middlewares/responseMiddleware";
 import { CustomError } from "../utils/CustomErrorHandling";
+import { IBookingService } from "../types/IBookingService";
+import { BookingService } from "../services/booking.service";
+import mongoose from "mongoose";
 
-class BookingController {
+export class BookingController  implements IBookingController<RequestHandler>{
+  private readonly bookingService:IBookingService<TaxiBooking>  = new BookingService();
+
   public get_all_bookings: RequestHandler = async (req, res) => {
     try {
-      const taxi_booking: TaxiBooking[] = await taxiBookingModel.find({});
-      if (taxi_booking.length === 0) return sendResponse(res, 404, "booking Not Found !");
-      sendResponse(res, 200, "success !!", taxi_booking);
+      const bookings:TaxiBooking[] = await this.bookingService.getAllBookings();
+      sendResponse(res, 200, "success !!", bookings);
     } catch (error) {
       if (error instanceof CustomError) {
         sendResponse(res, error.statusCode, error.message);
@@ -22,30 +27,31 @@ class BookingController {
   public get_booking_by_id: RequestHandler = async (req, res) => {
     try {
       const booking_id = req.params["booking_id"];
-      const booking = await taxiBookingModel.findById(booking_id);
+      const booking:TaxiBooking | null = await this.bookingService.getBookingById(booking_id);
+      
       if (!booking) return sendResponse(res, 404, "booking not found", booking);
-      sendResponse(res, 200, "success", booking);
+        sendResponse(res, 200, "success", booking);
+
     } catch (error) {
       if (error instanceof CustomError) {
-        sendResponse(res, error.statusCode, error.message);
+          sendResponse(res, error.statusCode, error.message);
       } else {
-        sendResponse(res, 500, "Internal Server Error");
+          sendResponse(res, 500, "Internal Server Error");
       }
     }
   }
 
-  public create_booking: RequestHandler = async (req, res) => {
+  public create_booking: RequestHandler = async (req, res):Promise<void> => {
     try {
-      const booking = await taxiBookingModel.create(req.body);
+      const booking = await this.bookingService.createBooking(req.body);
       return sendResponse(res, 201, "Created a Booking", booking);
     } catch (error) {
-      if (error instanceof CustomError) {
-        if (error.name === 'ValidationError') {
-          return sendResponse(res, error.statusCode, "Validation error");
-        }
-        sendResponse(res, error.statusCode, error.message);
+      if(error instanceof mongoose.Error.ValidationError){
+        return sendResponse(res, 400, error.message);
+      }else if (error instanceof CustomError) {
+        return sendResponse(res, error.statusCode, error.message);
       } else {
-        sendResponse(res, 500, "Internal Server Error");
+        return sendResponse(res, 500, "Internal Server Error");
       }
     }
   }
@@ -53,16 +59,18 @@ class BookingController {
   public updateOne_booking: RequestHandler = async (req, res) => {
     try {
       const booking_id = req.params["booking_id"];
-      const bookingUpdate = await taxiBookingModel.findOneAndUpdate({ _id: booking_id }, { $set: req.body }, { new: true });
+        const bookingUpdate = this.bookingService.updateOneBookingById(booking_id,req.body);
+
       if (!bookingUpdate) {
         return sendResponse(res, 404, "booking not found !");
       }
-      sendResponse(res, 204, "success ! updated booking");
+      return sendResponse(res, 204, "success ! updated booking",bookingUpdate);
     } catch (error) {
+      
       if (error instanceof CustomError) {
-        sendResponse(res, error.statusCode, error.message);
+        return sendResponse(res, error.statusCode, error.message);
       } else {
-        sendResponse(res, 500, "Internal server error");
+        return sendResponse(res, 500, "Internal server error");
       }
     }
   }
@@ -70,16 +78,18 @@ class BookingController {
   public updateMany_booking: RequestHandler = async (req, res) => {
     try {
       const booking_id = req.params["booking_id"];
-      const booking = await taxiBookingModel.updateOne({ _id: booking_id }, { $set: req.body });
-      if (booking.modifiedCount === 0) {
-        return sendResponse(res, 404, "booking not found or no changes made");
+      const booking = this.bookingService.updateManyBookingById(booking_id,req.body);
+      
+      if (!booking) {
+        return sendResponse(res, 404, "booking has no changes made");
       }
-      sendResponse(res, 200, "success updated a booking");
+      return sendResponse(res, 204, "success updated a booking",booking);
     } catch (error) {
+      
       if (error instanceof CustomError) {
-        sendResponse(res, error.statusCode, error.message);
+         return sendResponse(res, error.statusCode, error.message);
       } else {
-        sendResponse(res, 500, "Internal server error");
+        return sendResponse(res, 500, "Internal server error");
       }
     }
   }
@@ -87,16 +97,19 @@ class BookingController {
   public remove_booking: RequestHandler = async (req, res) => {
     try {
       const booking_id = req.params["booking_id"];
-      const booking = await taxiBookingModel.deleteOne({ _id: booking_id });
-      if (booking.deletedCount === 0) {
+      const booking = await this.bookingService.deleteBookingById(booking_id);
+      if (!booking) {
         return sendResponse(res, 404, "booking not found or already deleted");
       }
-      sendResponse(res, 204, "success in deletion of booking");
+      return sendResponse(res, 204, "success in deletion of booking",booking);
     } catch (error) {
+
       if (error instanceof CustomError) {
-        sendResponse(res, error.statusCode, error.message);
+      
+       return sendResponse(res, error.statusCode, error.message);
+      
       } else {
-        sendResponse(res, 500, "Internal server error");
+        return sendResponse(res, 500, "Internal server error");
       }
     }
   }

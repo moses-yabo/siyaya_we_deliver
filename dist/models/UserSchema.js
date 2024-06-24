@@ -38,6 +38,8 @@ const userSchema = new mongoose_1.default.Schema({
         enum: Object.values(userTypes_1.User_roles),
         default: userTypes_1.User_roles.ADMIN
     }
+}, {
+    timestamps: true
 });
 const userModel = mongoose_1.default.model("Users", userSchema);
 exports.default = userModel;

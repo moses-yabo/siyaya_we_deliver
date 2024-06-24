@@ -13,14 +13,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.trailerController = void 0;
-const TrailerSchema_1 = __importDefault(require("../models/TrailerSchema"));
+const trailer_service_1 = require("../services/trailer.service");
 const responseMiddleware_1 = require("../middlewares/responseMiddleware");
 const CustomErrorHandling_1 = require("../utils/CustomErrorHandling");
+const mongoose_1 = __importDefault(require("mongoose"));
 class TrailersController {
     constructor() {
+        this._trailerService = new trailer_service_1.TrailerServices();
         this.get_all_available_trailers = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const trailers = yield TrailerSchema_1.default.find({});
+                const trailers = yield this._trailerService.getAllTrailers();
                 if (trailers.length === 0)
                     return (0, responseMiddleware_1.sendResponse)(res, 404, "Trailers Not Found!");
                 (0, responseMiddleware_1.sendResponse)(res, 200, "Success!", trailers);
@@ -37,7 +39,7 @@ class TrailersController {
         this.get_trailer_by_id = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const trailerId = req.params["trailer_id"];
-                const trailer = yield TrailerSchema_1.default.findById(trailerId);
+                const trailer = yield this._trailerService.getTrailerById(trailerId);
                 if (!trailer)
                     return (0, responseMiddleware_1.sendResponse)(res, 404, "Trailer not found");
                 (0, responseMiddleware_1.sendResponse)(res, 200, "Success!", trailer);
@@ -53,11 +55,14 @@ class TrailersController {
         });
         this.add_trailer = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const trailer = yield TrailerSchema_1.default.create(req.body);
+                const trailer = yield this._trailerService.createTrailer(req.body);
                 return (0, responseMiddleware_1.sendResponse)(res, 201, "Created a trailer", trailer);
             }
             catch (error) {
-                if (error instanceof CustomErrorHandling_1.CustomError) {
+                if (error instanceof mongoose_1.default.Error.ValidationError) {
+                    return (0, responseMiddleware_1.sendResponse)(res, 400, error.message);
+                }
+                else if (error instanceof CustomErrorHandling_1.CustomError) {
                     if (error.name === 'ValidationError') {
                         return (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
                     }
@@ -71,7 +76,7 @@ class TrailersController {
         this.updateOne_trailer = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const trailer_id = req.params["trailer_id"];
-                const trailerUpdate = yield TrailerSchema_1.default.findOneAndUpdate({ _id: trailer_id }, { $set: req.body }, { new: true });
+                const trailerUpdate = yield this._trailerService.updateOneTrailerById(trailer_id, req.body);
                 if (!trailerUpdate)
                     return (0, responseMiddleware_1.sendResponse)(res, 404, "Trailer not found!");
                 (0, responseMiddleware_1.sendResponse)(res, 200, "Success! Trailer updated", trailerUpdate);
@@ -88,8 +93,8 @@ class TrailersController {
         this.updateMany_trailer = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const trailer_id = req.params["trailer_id"];
-                const trailer = yield TrailerSchema_1.default.updateOne({ _id: trailer_id }, { $set: req.body });
-                if (trailer.modifiedCount === 0)
+                const trailer = yield this._trailerService.updateManyTrailerById(trailer_id, req.body);
+                if (!trailer)
                     return (0, responseMiddleware_1.sendResponse)(res, 404, "Trailer not found or no changes made");
                 (0, responseMiddleware_1.sendResponse)(res, 200, "Success! Trailer updated");
             }
@@ -105,8 +110,8 @@ class TrailersController {
         this.remove_trailer = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const trailer_id = req.params["trailer_id"];
-                const trailer = yield TrailerSchema_1.default.deleteOne({ _id: trailer_id });
-                if (trailer.deletedCount === 0)
+                const trailer = yield this._trailerService.deleteTrailerById(trailer_id);
+                if (!trailer)
                     return (0, responseMiddleware_1.sendResponse)(res, 404, "Trailer not found or already deleted");
                 (0, responseMiddleware_1.sendResponse)(res, 200, "Success! Trailer deleted");
             }

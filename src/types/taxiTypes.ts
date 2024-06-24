@@ -1,4 +1,3 @@
-import { Request,Response } from "express";
 import {  Document, Schema} from "mongoose";
 
 
@@ -7,7 +6,7 @@ export enum Book_Taxi{
     NATIONAL_TRIP = "NATIONAL_TRIP",
 } 
 
-
+export interface ITaxiBooking extends Document ,TaxiBooking{};
 export interface TaxiBooking extends Document {
 
     passengerId?: Schema.Types.ObjectId; // Reference to the booking passenger's _id
@@ -15,7 +14,7 @@ export interface TaxiBooking extends Document {
     pickupLocation: Schema.Types.String;
     dropoffLocation: Schema.Types.String;
     pickupTime: Schema.Types.Date;
-    fare: Schema.Types.Number;
+    fare:Number;
     number_of_passengers:Number;
     tripType:Book_Taxi.LOCAL_TRIP | Book_Taxi.NATIONAL_TRIP
   }

@@ -25,7 +25,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const productsTypes_1 = require("../types/productsTypes");
-const TrailerHiringSchema = new mongoose_1.default.Schema({
+const ShippingSchema = new mongoose_1.Schema({
     trip_type: {
         type: String,
         enum: Object.values(productsTypes_1.Product_shipping),
@@ -60,11 +60,9 @@ const TrailerHiringSchema = new mongoose_1.default.Schema({
         minlength: 5,
         maxlength: 16,
         required: [true, "Destination is a required field"]
-    },
-    time_stamp: {
-        type: mongoose_1.Schema.Types.Date,
-        required: [true, "Time stamp is a required field"]
     }
+}, {
+    timestamps: true
 });
-const shippingModel = mongoose_1.default.model("Shipping", TrailerHiringSchema);
+const shippingModel = mongoose_1.default.model("Shipping", ShippingSchema);
 exports.default = (shippingModel);

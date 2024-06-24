@@ -6,3 +6,4 @@ var Book_Taxi;
     Book_Taxi["LOCAL_TRIP"] = "LOCAL_TRIP";
     Book_Taxi["NATIONAL_TRIP"] = "NATIONAL_TRIP";
 })(Book_Taxi || (exports.Book_Taxi = Book_Taxi = {}));
+;

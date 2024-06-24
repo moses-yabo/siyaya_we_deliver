@@ -6,7 +6,7 @@ export const validateObjectId = (param_id:string)=>{
         const id = req.params[param_id];
         
         if(!isValidObjectId(id)){
-            sendResponse(res,400,`Invalid ${id} ID`);
+            sendResponse(res,400,`Invalid ID ${id}`);
             return;
         }
         next();

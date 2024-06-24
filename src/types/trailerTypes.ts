@@ -8,7 +8,6 @@ export interface TrailerBooking extends Document {
     totalCost: Schema.Types.Number;
     tripType:Trailer_Hire.LOCAL_TRIP | Trailer_Hire.NATIONAL_TRIP;
     destination:Schema.Types.String;
-    time_stamp:Schema.Types.Date;
     duration:Schema.Types.Number;
     isAvailable: Schema.Types.Boolean;
     capacity: Schema.Types.String;

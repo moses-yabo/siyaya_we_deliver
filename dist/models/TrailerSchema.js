@@ -24,35 +24,37 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
-const TrailerSchema = new mongoose_1.default.Schema({
+const TrailerSchema = new mongoose_1.Schema({
     imgUrl: {
-        type: Object.values([mongoose_1.Schema.Types.Buffer, String]),
-        required: [false, "image of the taxi"]
+        type: mongoose_1.default.Schema.Types.Buffer,
+        required: [false, "Image of the trailer"]
     },
     description: {
         type: String,
         minlength: 8,
         maxlength: 250,
-        required: [false, "trailer description"]
+        required: [false, "Trailer description"]
     },
     capacity: {
-        type: mongoose_1.Schema.Types.String,
-        required: [true, "how big or small the traiiler ex: Xsmall , Medium , Large"]
+        type: String,
+        required: [true, "Trailer capacity is required"]
     },
     fleet_no: {
         type: String,
         minlength: 10,
-        max: 35,
-        required: [true, "fleet_no is required"]
+        maxlength: 35,
+        required: [true, "Fleet number is required"]
     },
     isAvailable: {
         type: Boolean,
-        required: [true, "Is the trailer available"]
+        required: [true, "Availability status is required"]
     },
     isRented: {
         type: Boolean,
-        required: [true, "is the trailer rented ?"]
+        required: [true, "Rental status is required"]
     }
+}, {
+    timestamps: true
 });
 const trailerModel = mongoose_1.default.model("Trailers", TrailerSchema);
 exports.default = trailerModel;

@@ -37,10 +37,8 @@ const userSchema:Schema<IUser> = new mongoose.Schema({
             enum:Object.values(User_roles),
             default:User_roles.ADMIN
         }
-
-
-
-
+},{
+    timestamps:true
 });
 
  const  userModel = mongoose.model<IUser>("Users",userSchema);

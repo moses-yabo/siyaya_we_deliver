@@ -1,6 +1,6 @@
 import express from "express";
 import {config} from "dotenv";
-import { QuanterMiddlewares } from "./middlware/middlewareConfig";
+import { QuanterMiddlewares } from "./middlewares/middlewareConfig";
 import DbContext from "./Db/DbContext";
 
 class ServerEntryPoint {

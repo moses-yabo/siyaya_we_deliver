@@ -12,18 +12,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.bookingController = void 0;
-const BookingSchema_1 = __importDefault(require("../models/BookingSchema"));
+exports.bookingController = exports.BookingController = void 0;
 const responseMiddleware_1 = require("../middlewares/responseMiddleware");
 const CustomErrorHandling_1 = require("../utils/CustomErrorHandling");
+const booking_service_1 = require("../services/booking.service");
+const mongoose_1 = __importDefault(require("mongoose"));
 class BookingController {
     constructor() {
+        this.bookingService = new booking_service_1.BookingService();
         this.get_all_bookings = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const taxi_booking = yield BookingSchema_1.default.find({});
-                if (taxi_booking.length === 0)
-                    return (0, responseMiddleware_1.sendResponse)(res, 404, "booking Not Found !");
-                (0, responseMiddleware_1.sendResponse)(res, 200, "success !!", taxi_booking);
+                const bookings = yield this.bookingService.getAllBookings();
+                (0, responseMiddleware_1.sendResponse)(res, 200, "success !!", bookings);
             }
             catch (error) {
                 if (error instanceof CustomErrorHandling_1.CustomError) {
@@ -37,7 +37,7 @@ class BookingController {
         this.get_booking_by_id = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const booking_id = req.params["booking_id"];
-                const booking = yield BookingSchema_1.default.findById(booking_id);
+                const booking = yield this.bookingService.getBookingById(booking_id);
                 if (!booking)
                     return (0, responseMiddleware_1.sendResponse)(res, 404, "booking not found", booking);
                 (0, responseMiddleware_1.sendResponse)(res, 200, "success", booking);
@@ -53,75 +53,76 @@ class BookingController {
         });
         this.create_booking = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const booking = yield BookingSchema_1.default.create(req.body);
+                const booking = yield this.bookingService.createBooking(req.body);
                 return (0, responseMiddleware_1.sendResponse)(res, 201, "Created a Booking", booking);
             }
             catch (error) {
-                if (error instanceof CustomErrorHandling_1.CustomError) {
-                    if (error.name === 'ValidationError') {
-                        return (0, responseMiddleware_1.sendResponse)(res, error.statusCode, "Validation error");
-                    }
-                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
+                if (error instanceof mongoose_1.default.Error.ValidationError) {
+                    return (0, responseMiddleware_1.sendResponse)(res, 400, error.message);
+                }
+                else if (error instanceof CustomErrorHandling_1.CustomError) {
+                    return (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
                 }
                 else {
-                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal Server Error");
+                    return (0, responseMiddleware_1.sendResponse)(res, 500, "Internal Server Error");
                 }
             }
         });
         this.updateOne_booking = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const booking_id = req.params["booking_id"];
-                const bookingUpdate = yield BookingSchema_1.default.findOneAndUpdate({ _id: booking_id }, { $set: req.body }, { new: true });
+                const bookingUpdate = this.bookingService.updateOneBookingById(booking_id, req.body);
                 if (!bookingUpdate) {
                     return (0, responseMiddleware_1.sendResponse)(res, 404, "booking not found !");
                 }
-                (0, responseMiddleware_1.sendResponse)(res, 204, "success ! updated booking");
+                return (0, responseMiddleware_1.sendResponse)(res, 204, "success ! updated booking", bookingUpdate);
             }
             catch (error) {
                 if (error instanceof CustomErrorHandling_1.CustomError) {
-                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
+                    return (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
                 }
                 else {
-                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal server error");
+                    return (0, responseMiddleware_1.sendResponse)(res, 500, "Internal server error");
                 }
             }
         });
         this.updateMany_booking = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const booking_id = req.params["booking_id"];
-                const booking = yield BookingSchema_1.default.updateOne({ _id: booking_id }, { $set: req.body });
-                if (booking.modifiedCount === 0) {
-                    return (0, responseMiddleware_1.sendResponse)(res, 404, "booking not found or no changes made");
+                const booking = this.bookingService.updateManyBookingById(booking_id, req.body);
+                if (!booking) {
+                    return (0, responseMiddleware_1.sendResponse)(res, 404, "booking has no changes made");
                 }
-                (0, responseMiddleware_1.sendResponse)(res, 200, "success updated a booking");
+                return (0, responseMiddleware_1.sendResponse)(res, 204, "success updated a booking", booking);
             }
             catch (error) {
                 if (error instanceof CustomErrorHandling_1.CustomError) {
-                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
+                    return (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
                 }
                 else {
-                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal server error");
+                    return (0, responseMiddleware_1.sendResponse)(res, 500, "Internal server error");
                 }
             }
         });
         this.remove_booking = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const booking_id = req.params["booking_id"];
-                const booking = yield BookingSchema_1.default.deleteOne({ _id: booking_id });
-                if (booking.deletedCount === 0) {
+                const booking = yield this.bookingService.deleteBookingById(booking_id);
+                if (!booking) {
                     return (0, responseMiddleware_1.sendResponse)(res, 404, "booking not found or already deleted");
                 }
-                (0, responseMiddleware_1.sendResponse)(res, 204, "success in deletion of booking");
+                return (0, responseMiddleware_1.sendResponse)(res, 204, "success in deletion of booking", booking);
             }
             catch (error) {
                 if (error instanceof CustomErrorHandling_1.CustomError) {
-                    (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
+                    return (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
                 }
                 else {
-                    (0, responseMiddleware_1.sendResponse)(res, 500, "Internal server error");
+                    return (0, responseMiddleware_1.sendResponse)(res, 500, "Internal server error");
                 }
             }
         });
     }
 }
+exports.BookingController = BookingController;
 exports.bookingController = new BookingController();

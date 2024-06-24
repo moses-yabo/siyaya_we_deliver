@@ -40,25 +40,40 @@ const TaxiBookingSchema = new mongoose_1.default.Schema({
     },
     pickupTime: {
         type: mongoose_1.Schema.Types.Date,
-        required: [true, "Pick up time is a required field"]
+        required: [true, "Pick up time is a required field"],
+        validate: (value) => value > new Date()
     },
     fare: {
         type: Number,
-        min: 10,
-        max: 8000,
+        min: [10, "Fare must be at least 10"],
+        max: [8000, "Fare must be less than 8000"],
         required: [true, "fare is a required field"]
     },
     tripType: {
         type: String,
-        enum: Object.values(taxiTypes_1.Book_Taxi),
+        enum: {
+            values: Object.values(taxiTypes_1.Book_Taxi),
+            message: `Trip typr must be one of: ${Object.values(taxiTypes_1.Book_Taxi).join(", ")}`
+        },
         required: [true, "TripType is a required field"]
     },
     number_of_passengers: {
         type: Number,
         min: 1,
         max: 500,
-        required: [true, "No of passengers 1 is the default"]
+        required: [true, "No of passengers 1 is the default"],
+        default: 1
     }
+}, {
+    timestamps: true
 });
+TaxiBookingSchema.virtual('formattedFare').get(function () {
+    const fare = Number(this.fare).toFixed(2);
+    return `R${fare}`;
+});
+TaxiBookingSchema.methods.calculateEstimatedArrivalTime = function () {
+    const travelTimeInMinutes = 30;
+    return new Date(this.pickupTime.getTime() + travelTimeInMinutes * 60000);
+};
 const taxiBookingModel = mongoose_1.default.model("Bookings", TaxiBookingSchema);
 exports.default = taxiBookingModel;

@@ -13,14 +13,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.shippingController = void 0;
-const ShippingSchema_1 = __importDefault(require("../models/ShippingSchema"));
 const responseMiddleware_1 = require("../middlewares/responseMiddleware");
 const CustomErrorHandling_1 = require("../utils/CustomErrorHandling");
+const shipping_service_1 = require("../services/shipping.service");
+const mongoose_1 = __importDefault(require("mongoose"));
 class ShippingController {
     constructor() {
+        this._shippingService = new shipping_service_1.ShippingServices();
         this.get_all_shippings = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const shippings = yield ShippingSchema_1.default.find({});
+                const shippings = yield this._shippingService.getAllShippings();
                 if (shippings.length === 0)
                     return (0, responseMiddleware_1.sendResponse)(res, 404, "Shippings Not Found!");
                 (0, responseMiddleware_1.sendResponse)(res, 200, "Success!", shippings);
@@ -37,7 +39,7 @@ class ShippingController {
         this.get_shipping_by_id = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const shipping_id = req.params["shipping_id"];
-                const shipping = yield ShippingSchema_1.default.findById(shipping_id);
+                const shipping = yield this._shippingService.getShippingById(shipping_id);
                 if (!shipping)
                     return (0, responseMiddleware_1.sendResponse)(res, 404, "Shipping not found");
                 (0, responseMiddleware_1.sendResponse)(res, 200, "Success!", shipping);
@@ -53,14 +55,14 @@ class ShippingController {
         });
         this.create_shipping = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const shipping = yield ShippingSchema_1.default.create(req.body);
+                const shipping = yield this._shippingService.createShipping(req.body);
                 return (0, responseMiddleware_1.sendResponse)(res, 201, "Created a shipping", shipping);
             }
             catch (error) {
-                if (error instanceof CustomErrorHandling_1.CustomError) {
-                    if (error.name === 'ValidationError') {
-                        return (0, responseMiddleware_1.sendResponse)(res, error.statusCode, "Validation error");
-                    }
+                if (error instanceof mongoose_1.default.Error.ValidationError) {
+                    return (0, responseMiddleware_1.sendResponse)(res, 400, error.message);
+                }
+                else if (error instanceof CustomErrorHandling_1.CustomError) {
                     return (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
                 }
                 else {
@@ -71,7 +73,7 @@ class ShippingController {
         this.updateOne_shipping = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const shipping_id = req.params["shipping_id"];
-                const shippingUpdate = yield ShippingSchema_1.default.findOneAndUpdate({ _id: shipping_id }, { $set: req.body }, { new: true });
+                const shippingUpdate = yield this._shippingService.updateOneShippingById(shipping_id, req.body);
                 if (!shippingUpdate)
                     return (0, responseMiddleware_1.sendResponse)(res, 404, "Shipping not found!");
                 (0, responseMiddleware_1.sendResponse)(res, 200, "Success! Shipping updated", shippingUpdate);
@@ -88,8 +90,8 @@ class ShippingController {
         this.updateMany_shipping = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const shipping_id = req.params["shipping_id"];
-                const shipping = yield ShippingSchema_1.default.updateOne({ _id: shipping_id }, { $set: req.body });
-                if (shipping.modifiedCount === 0)
+                const shipping = yield this._shippingService.updateManyShippingById(shipping_id, req.body);
+                if (!shipping)
                     return (0, responseMiddleware_1.sendResponse)(res, 404, "Shipping not found or no changes made");
                 (0, responseMiddleware_1.sendResponse)(res, 200, "Success! Shipping updated");
             }
@@ -105,8 +107,8 @@ class ShippingController {
         this.remove_shipping = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const shipping_id = req.params["shipping_id"];
-                const user = yield ShippingSchema_1.default.deleteOne({ _id: shipping_id });
-                if (user.deletedCount === 0)
+                const user = yield this._shippingService.deleteShippingById(shipping_id);
+                if (user)
                     return (0, responseMiddleware_1.sendResponse)(res, 404, "Shipping not found or already deleted");
                 (0, responseMiddleware_1.sendResponse)(res, 200, "Success! Shipping deleted");
             }

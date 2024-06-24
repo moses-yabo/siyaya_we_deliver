@@ -14,13 +14,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.taxiController = void 0;
 const responseMiddleware_1 = require("../middlewares/responseMiddleware");
-const TaxiSchema_1 = __importDefault(require("../models/TaxiSchema"));
+const taxi_service_1 = require("../services/taxi.service");
 const CustomErrorHandling_1 = require("../utils/CustomErrorHandling");
+const mongoose_1 = __importDefault(require("mongoose"));
 class TaxiController {
     constructor() {
+        this._taxi_services = new taxi_service_1.TaxiServices();
         this.get_all_available_taxi = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const taxis = yield TaxiSchema_1.default.find({});
+                const taxis = yield this._taxi_services.getAllTaxis();
                 if (taxis.length === 0)
                     return (0, responseMiddleware_1.sendResponse)(res, 404, "Taxis Not Found!");
                 (0, responseMiddleware_1.sendResponse)(res, 200, "Success!", taxis);
@@ -37,7 +39,7 @@ class TaxiController {
         this.get_taxi_by_id = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const taxi_id = req.params["taxi_id"];
-                const taxi = yield TaxiSchema_1.default.findById(taxi_id);
+                const taxi = yield this._taxi_services.getTaxiById(taxi_id);
                 if (!taxi)
                     return (0, responseMiddleware_1.sendResponse)(res, 404, "Taxi not found");
                 (0, responseMiddleware_1.sendResponse)(res, 200, "Success!", taxi);
@@ -53,25 +55,26 @@ class TaxiController {
         });
         this.add_taxi = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const taxi = yield TaxiSchema_1.default.create(req.body);
+                const taxi = yield this._taxi_services.createTaxi(req.body);
                 return (0, responseMiddleware_1.sendResponse)(res, 201, "Created a taxi", taxi);
             }
             catch (error) {
-                if (error instanceof CustomErrorHandling_1.CustomError) {
-                    if (error.name === 'ValidationError') {
-                        return (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
-                    }
+                if (error instanceof mongoose_1.default.Error.ValidationError) {
+                    return (0, responseMiddleware_1.sendResponse)(res, 400, error.message);
+                }
+                else if (error instanceof CustomErrorHandling_1.CustomError) {
                     return (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
                 }
                 else {
                     return (0, responseMiddleware_1.sendResponse)(res, 500, "Failed to create a taxi");
                 }
+                ;
             }
         });
         this.updateOne_taxi = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const taxi_id = req.params["taxi_id"];
-                const taxiUpdate = yield TaxiSchema_1.default.findOneAndUpdate({ _id: taxi_id }, { $set: req.body }, { new: true });
+                const taxiUpdate = yield this._taxi_services.updateOneTaxiById(taxi_id, req.body);
                 if (!taxiUpdate)
                     return (0, responseMiddleware_1.sendResponse)(res, 404, "Taxi not found!");
                 (0, responseMiddleware_1.sendResponse)(res, 200, "Success! Taxi updated", taxiUpdate);
@@ -88,8 +91,8 @@ class TaxiController {
         this.updateMany_taxi = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const taxi_id = req.params["taxi_id"];
-                const taxi = yield TaxiSchema_1.default.updateOne({ _id: taxi_id }, { $set: req.body });
-                if (taxi.modifiedCount === 0)
+                const taxi = yield this._taxi_services.updateManyTaxiById(taxi_id, req.body);
+                if (!taxi)
                     return (0, responseMiddleware_1.sendResponse)(res, 404, "Taxi not found or no changes made");
                 (0, responseMiddleware_1.sendResponse)(res, 200, "Success! Taxi updated");
             }
@@ -105,8 +108,8 @@ class TaxiController {
         this.remove_taxi = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const taxi_id = req.params["taxi_id"];
-                const taxi = yield TaxiSchema_1.default.deleteOne({ _id: taxi_id });
-                if (taxi.deletedCount === 0)
+                const taxi = yield this._taxi_services.deleteTaxiById(taxi_id);
+                if (!taxi)
                     return (0, responseMiddleware_1.sendResponse)(res, 404, "Taxi not found or already deleted");
                 (0, responseMiddleware_1.sendResponse)(res, 200, "Success! Taxi deleted");
             }

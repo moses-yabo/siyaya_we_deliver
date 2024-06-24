@@ -12,7 +12,7 @@ export  interface shipping_Type extends Document{
     taxi_driver:String,
     departure:String,
     destination:String
-    time_stamp:Date | String
+ 
 
 }
 

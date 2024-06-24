@@ -2,40 +2,38 @@ import mongoose,{ Schema} from "mongoose";
 import { Taxi } from "../types/taxiTypes";
 
 
-const TaxiSchema:Schema<Taxi> = new mongoose.Schema({
-    imgUrl:{
-    type:Object.values([Schema.Types.Buffer, String]),
-    minlength:3,
-    maxlength:250,
-    required:[false,"image of the taxi"]
-},
-description:{
-    type:String,
-    minlength:8,
-    maxlength:250,
-    required:[true,"Drop off location date is a required field"]
-},
-capacity:{
-    type:Schema.Types.String,
-    required:[true,"Pick up time is a required field"]
-},
-fleet_no:{
-    type:String,
-    minlength:10,
-    max:35,
-    required:[true,"fare is a required field"]
-},
-isAvailable:{
-    type:Boolean,
-    required:[true,"TripType is a required field"]
-},
-isBooked:{
-    type:Boolean,
-    required:[true,"TripType is a required field"]
-}
-
+const TaxiSchema: Schema<Taxi> = new Schema({
+    imgUrl: {
+        type: mongoose.Schema.Types.Buffer, // Assuming imgUrl can be Buffer or String
+        minlength: 3,
+        maxlength: 250,
+        required: [false, "Image of the taxi"]
+    },
+    description: {
+        type: String,
+        minlength: 8,
+        maxlength: 250,
+        required: [true, "Description is a required field"]
+    },
+    capacity: {
+        type: String, 
+        required: [true, "Capacity is a required field"]
+    },
+    fleet_no: {
+        type: String,
+        minlength: 10,
+        maxlength: 35,
+        required: [true, "Fleet number is a required field"]
+    },
+    isAvailable: {
+        type: Boolean,
+        required: [true, "Availability status is a required field"]
+    },
+    isBooked: {
+        type: Boolean,
+        required: [true, "Booking status is a required field"]
+    }
 });
-
 
 
 
