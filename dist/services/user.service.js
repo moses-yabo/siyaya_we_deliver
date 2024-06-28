@@ -14,18 +14,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserServices = void 0;
 const UserSchema_1 = __importDefault(require("../models/UserSchema"));
-const CustomErrorHandling_1 = require("../utils/CustomErrorHandling");
+const AppErrorHandling_1 = require("../utils/AppErrorHandling");
 class UserServices {
     /**
      * Retrieves all users from the database.
      *
      * This method fetches all user documents from the UserModel collection.
-     * If an error occurs during the retrieval process, a CustomError is thrown.
+     * If an error occurs during the retrieval process, a AppError is thrown.
      *
      * @async
      * @function getAllUsers
      * @returns {Promise<IUser[]>} A promise that resolves to an array of IUser objects.
-     * @throws {CustomError} Throws an error if users are not found or if there is an issue with the database query.
+     * @throws {AppError} Throws an error if users are not found or if there is an issue with the database query.
      *
      * @example
      * // Example usage in an async function
@@ -43,7 +43,7 @@ class UserServices {
                 return users;
             }
             catch (error) {
-                throw new CustomErrorHandling_1.CustomError("User not found", 404);
+                throw new AppErrorHandling_1.AppError("User not found", 404);
             }
         });
     }
@@ -51,13 +51,13 @@ class UserServices {
      * Retrieves a user by their ID from the database.
      *
      * This method fetches a user document from the UserModel collection by the given userId.
-     * If the user is not found, it throws a CustomError.
+     * If the user is not found, it throws a AppError.
      *
      * @async
      * @function getUserById
      * @param {string} userId - The ID of the user to retrieve.
      * @returns {Promise<IUser>} A promise that resolves to an IUser object.
-     * @throws {CustomError} Throws an error if the user is not found.
+     * @throws {AppError} Throws an error if the user is not found.
      *
      * @example
      * // Example usage in an async function
@@ -73,7 +73,7 @@ class UserServices {
             try {
                 const user = yield UserSchema_1.default.findById(userId);
                 if (!user) {
-                    throw new CustomErrorHandling_1.CustomError("taxi not Found", 404);
+                    throw new AppErrorHandling_1.AppError("taxi not Found", 404);
                 }
                 return user;
             }
@@ -130,7 +130,7 @@ class UserServices {
      * @param {string} userId - The ID of the user to update.
      * @param {IUser} userData - The data to update the user with.
      * @returns {Promise<boolean>} A promise that resolves to true if the user was updated successfully.
-     * @throws {CustomError} Throws a CustomError if the user is not found.
+     * @throws {AppError} Throws a AppError if the user is not found.
      * @throws {Error} Throws a generic error if there is an issue with updating the user.
      *
      * @example
@@ -154,7 +154,7 @@ class UserServices {
             try {
                 const userUpdate = yield UserSchema_1.default.findByIdAndUpdate(userId, userData, { new: true });
                 if (!userUpdate) {
-                    throw new CustomErrorHandling_1.CustomError("User not found", 404);
+                    throw new AppErrorHandling_1.AppError("User not found", 404);
                 }
                 return true;
             }
@@ -173,7 +173,7 @@ class UserServices {
      * @param {string} userId - The ID of the user to update.
      * @param {IUser} updateData - The data to update the user with.
      * @returns {Promise<boolean>} A promise that resolves to true if the user was updated successfully.
-     * @throws {CustomError} Throws a CustomError if the user is not found.
+     * @throws {AppError} Throws a AppError if the user is not found.
      * @throws {Error} Throws a generic error if there is an issue with updating the user.
      *
      * @example
@@ -197,7 +197,7 @@ class UserServices {
             try {
                 const userUpdate = yield UserSchema_1.default.updateOne({ _id: userId }, { $set: updateData });
                 if (userUpdate.modifiedCount === 0) {
-                    throw new CustomErrorHandling_1.CustomError("User not found", 404);
+                    throw new AppErrorHandling_1.AppError("User not found", 404);
                 }
                 return true;
             }
@@ -216,7 +216,7 @@ class UserServices {
      * @function deleteUserById
      * @param {string} userId - The ID of the user to delete.
      * @returns {Promise<boolean>} A promise that resolves to true if the user was deleted successfully.
-     * @throws {CustomError} Throws a CustomError if the user is not found.
+     * @throws {AppError} Throws a AppError if the user is not found.
      * @throws {Error} Throws a generic error if there is an issue with deleting the user.
      *
      * @example
@@ -235,7 +235,7 @@ class UserServices {
             try {
                 const userDelete = yield UserSchema_1.default.findByIdAndDelete(userId);
                 if (!userDelete) {
-                    throw new CustomErrorHandling_1.CustomError('Trailer not found', 404);
+                    throw new AppErrorHandling_1.AppError('Trailer not found', 404);
                 }
                 return true;
             }

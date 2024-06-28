@@ -270,6 +270,26 @@
                     "category": {
                         "type": "string",
                         "description": "Category of the product"
+                    },
+                    "destination": {
+                        "type": "string",
+                        "description": "description of the product"
+                    },
+                    "departure": {
+                        "type": "string",
+                        "description": "departure of the product"
+                    },
+                    "taxi_owner": {
+                        "type": "string",
+                        "description": "Taxi owner"
+                    },
+                    "taxi_driver": {
+                        "type": "string",
+                        "description": "taxi driver"
+                    },
+                    "fleet": {
+                        "type": "string",
+                        "description": "fleet number"
                     }
                 }
             }
@@ -470,7 +490,7 @@
                 "tags": [
                     "Taxi"
                 ],
-                "description": "Get all Taxi Products rentals.",
+                "description": "Get all availalable Taxi ",
                 "responses": {
                     "200": {
                         "description": "Successful response",

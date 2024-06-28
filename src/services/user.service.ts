@@ -1,18 +1,18 @@
 import { IUserService } from "../types/IUserService";
 import { IUser } from "../types/userTypes";
 import UserModel from "../models/UserSchema";
-import { CustomError } from "../utils/CustomErrorHandling";
+import { AppError } from "../utils/AppErrorHandling";
 export class UserServices implements IUserService<IUser>{
 /**
  * Retrieves all users from the database.
  * 
  * This method fetches all user documents from the UserModel collection. 
- * If an error occurs during the retrieval process, a CustomError is thrown.
+ * If an error occurs during the retrieval process, a AppError is thrown.
  * 
  * @async
  * @function getAllUsers
  * @returns {Promise<IUser[]>} A promise that resolves to an array of IUser objects.
- * @throws {CustomError} Throws an error if users are not found or if there is an issue with the database query.
+ * @throws {AppError} Throws an error if users are not found or if there is an issue with the database query.
  * 
  * @example
  * // Example usage in an async function
@@ -29,20 +29,20 @@ export class UserServices implements IUserService<IUser>{
         return users;
     } catch (error) {
 
-        throw new CustomError("User not found",404);
+        throw new AppError("User not found",404);
     }
 }
 /**
  * Retrieves a user by their ID from the database.
  * 
  * This method fetches a user document from the UserModel collection by the given userId.
- * If the user is not found, it throws a CustomError.
+ * If the user is not found, it throws a AppError.
  * 
  * @async
  * @function getUserById
  * @param {string} userId - The ID of the user to retrieve.
  * @returns {Promise<IUser>} A promise that resolves to an IUser object.
- * @throws {CustomError} Throws an error if the user is not found.
+ * @throws {AppError} Throws an error if the user is not found.
  * 
  * @example
  * // Example usage in an async function
@@ -58,7 +58,7 @@ public async getUserById(userId: string): Promise<IUser>{
    try {
     const user:IUser | null = await UserModel.findById(userId);
         if (!user) {
-            throw new CustomError("taxi not Found",404);
+            throw new AppError("taxi not Found",404);
         }
         return user;
    } catch (error) {
@@ -111,7 +111,7 @@ public async getUserById(userId: string): Promise<IUser>{
  * @param {string} userId - The ID of the user to update.
  * @param {IUser} userData - The data to update the user with.
  * @returns {Promise<boolean>} A promise that resolves to true if the user was updated successfully.
- * @throws {CustomError} Throws a CustomError if the user is not found.
+ * @throws {AppError} Throws a AppError if the user is not found.
  * @throws {Error} Throws a generic error if there is an issue with updating the user.
  * 
  * @example
@@ -134,7 +134,7 @@ public async getUserById(userId: string): Promise<IUser>{
         try {
             const userUpdate = await UserModel.findByIdAndUpdate(userId, userData, { new: true });
             if (!userUpdate) {
-                throw new CustomError("User not found",404);
+                throw new AppError("User not found",404);
             }
                 return true;
            } catch (error) {
@@ -151,7 +151,7 @@ public async getUserById(userId: string): Promise<IUser>{
  * @param {string} userId - The ID of the user to update.
  * @param {IUser} updateData - The data to update the user with.
  * @returns {Promise<boolean>} A promise that resolves to true if the user was updated successfully.
- * @throws {CustomError} Throws a CustomError if the user is not found.
+ * @throws {AppError} Throws a AppError if the user is not found.
  * @throws {Error} Throws a generic error if there is an issue with updating the user.
  * 
  * @example
@@ -174,7 +174,7 @@ public async getUserById(userId: string): Promise<IUser>{
         try {
             const userUpdate = await UserModel.updateOne({ _id: userId }, { $set:updateData});
             if (userUpdate.modifiedCount === 0) {
-                throw new CustomError("User not found",404);
+                throw new AppError("User not found",404);
             }
             return true;
         } catch (error) {
@@ -191,7 +191,7 @@ public async getUserById(userId: string): Promise<IUser>{
  * @function deleteUserById
  * @param {string} userId - The ID of the user to delete.
  * @returns {Promise<boolean>} A promise that resolves to true if the user was deleted successfully.
- * @throws {CustomError} Throws a CustomError if the user is not found.
+ * @throws {AppError} Throws a AppError if the user is not found.
  * @throws {Error} Throws a generic error if there is an issue with deleting the user.
  * 
  * @example
@@ -209,7 +209,7 @@ public async getUserById(userId: string): Promise<IUser>{
         try {
             const userDelete = await UserModel.findByIdAndDelete(userId);
             if (!userDelete) {
-              throw new CustomError('Trailer not found',404);
+              throw new AppError('Trailer not found',404);
             }
             return true
         } catch (error) {

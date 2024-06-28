@@ -1,19 +1,19 @@
 import { ITrailerService } from "../types/ITrailerService";
 import { Trailer } from "../types/trailerTypes";
 import TrailerModel from "../models/TrailerSchema";
-import { CustomError } from "../utils/CustomErrorHandling";
+import { AppError } from "../utils/AppErrorHandling";
 export class TrailerServices implements ITrailerService<Trailer>{
 
     /**
  * Retrieves all trailers from the database.
  * 
  * This method fetches all trailer documents from the TrailerModel collection. 
- * If an error occurs during the retrieval process, a CustomError is thrown.
+ * If an error occurs during the retrieval process, a AppError is thrown.
  * 
  * @async
  * @function getAllTrailers
  * @returns {Promise<Trailer[]>} A promise that resolves to an array of Trailer objects.
- * @throws {CustomError} Throws an error if users are not found or if there is an issue with the database query.
+ * @throws {AppError} Throws an error if users are not found or if there is an issue with the database query.
  * 
  * @example
  * // Example usage in an async function
@@ -31,20 +31,20 @@ export class TrailerServices implements ITrailerService<Trailer>{
         return trailers;
     } catch (error) {
 
-        throw new CustomError("trailer not found",404);
+        throw new AppError("trailer not found",404);
     }
 }
 /**
  * Retrieves a trailerr by their ID from the database.
  * 
  * This method fetches a trailer document from the TrailerModel collection by the given userId.
- * If the user is not found, it throws a CustomError.
+ * If the user is not found, it throws a AppError.
  * 
  * @async
  * @function getUserById
  * @param {string} userId - The ID of the user to retrieve.
  * @returns {Promise<IUser>} A promise that resolves to an IUser object.
- * @throws {CustomError} Throws an error if the user is not found.
+ * @throws {AppError} Throws an error if the user is not found.
  * 
  * @example
  * // Example usage in an async function
@@ -60,7 +60,7 @@ public async getTrailerById(trailerId: string): Promise<Trailer>{
    try {
     const trailer:Trailer | null = await TrailerModel.findById(trailerId);
         if (!trailer) {
-            throw new CustomError("trailer not Found",404);
+            throw new AppError("trailer not Found",404);
         }
         return trailer;
    } catch (error) {
@@ -104,14 +104,14 @@ public async getTrailerById(trailerId: string): Promise<Trailer>{
  * Updates a trailer by its ID.
  * 
  * This function updates a trailer's data based on the provided trailer ID and update data. If the trailer
- * is not found, it throws a CustomError. If the update is successful, it returns true.
+ * is not found, it throws a AppError. If the update is successful, it returns true.
  * 
  * @async
  * @function updateOneTrailerById
  * @param {string} trailerId - The ID of the trailer to update.
  * @param {Trailer} updateData - The new data to update the trailer with.
  * @returns {Promise<boolean>} A promise that resolves to true if the update is successful.
- * @throws {CustomError} If the trailer is not found.
+ * @throws {AppError} If the trailer is not found.
  * @throws {Error} If any other error occurs during the update process.
  * 
  * @example
@@ -130,7 +130,7 @@ public async getTrailerById(trailerId: string): Promise<Trailer>{
         try {
             const trailerUpdate = await TrailerModel.findByIdAndUpdate(trailerId, updateData, { new: true });
             if (!trailerUpdate) {
-                throw new CustomError("Trailer not found",404);
+                throw new AppError("Trailer not found",404);
             }
                 return true;
            } catch (error) {
@@ -141,7 +141,7 @@ public async getTrailerById(trailerId: string): Promise<Trailer>{
  * Updates multiple fields of a trailer by its ID.
  * 
  * This function updates multiple fields of a trailer's data based on the provided trailer ID and update data.
- * If the trailer is not found or no changes are made, it throws a CustomError. If the update is successful,
+ * If the trailer is not found or no changes are made, it throws a AppError. If the update is successful,
  * it returns true.
  * 
  * @async
@@ -149,7 +149,7 @@ public async getTrailerById(trailerId: string): Promise<Trailer>{
  * @param {string} trailerId - The ID of the trailer to update.
  * @param {Trailer} updateData - The new data to update the trailer with.
  * @returns {Promise<boolean>} A promise that resolves to true if the update is successful.
- * @throws {CustomError} If the trailer is not found or no changes are made.
+ * @throws {AppError} If the trailer is not found or no changes are made.
  * @throws {Error} If any other error occurs during the update process.
  * 
  * @example
@@ -168,7 +168,7 @@ public async getTrailerById(trailerId: string): Promise<Trailer>{
         try {
             const trailerUpdate = await TrailerModel.updateOne({ _id: trailerId }, { $set:updateData});
             if (trailerUpdate.modifiedCount === 0) {
-                throw new CustomError("Trailer not found | Trailer has no changes made",404);
+                throw new AppError("Trailer not found | Trailer has no changes made",404);
             }
             return true;
         } catch (error) {
@@ -181,14 +181,14 @@ public async getTrailerById(trailerId: string): Promise<Trailer>{
  * Deletes a trailer by its ID.
  * 
  * This function deletes a trailer from the database based on the provided trailer ID.
- * If the trailer is not found, it throws a CustomError. If the deletion is successful,
+ * If the trailer is not found, it throws a AppError. If the deletion is successful,
  * it returns true.
  * 
  * @async
  * @function deleteTrailerById
  * @param {string} trailerId - The ID of the trailer to delete.
  * @returns {Promise<boolean>} A promise that resolves to true if the deletion is successful.
- * @throws {CustomError} If the trailer is not found.
+ * @throws {AppError} If the trailer is not found.
  * @throws {Error} If any other error occurs during the deletion process.
  * 
  * @example
@@ -203,7 +203,7 @@ public async getTrailerById(trailerId: string): Promise<Trailer>{
         try {
             const trailerDelete = await TrailerModel.findByIdAndDelete(trailerId);
             if (!trailerDelete) {
-              throw new CustomError('Trailer not found',404);
+              throw new AppError('Trailer not found',404);
             }
             return true
         } catch (error) {

@@ -1,7 +1,7 @@
 import { IProductService  } from "../types/IProductService";
 import { Products } from "../types/productsTypes";
 import ProductModel from "../models/ProductsSchema";
-import { CustomError } from "../utils/CustomErrorHandling";
+import { AppError } from "../utils/AppErrorHandling";
 export class ProductServices implements IProductService<Products>{
     /**
      * Retrieves all products from the database.
@@ -9,14 +9,14 @@ export class ProductServices implements IProductService<Products>{
      * @async
      * @function getAllProducts
      * @returns {Promise<Products[]>} A promise that resolves to an array of product objects.
-     * @throws {CustomError} If no products are found.
+     * @throws {AppError} If no products are found.
      */
     public async getAllProducts(): Promise<Products[]> {
         try {
             const products: Products[] = await ProductModel.find({});
             return products;
         } catch (error) {
-            throw new CustomError("product not found", 404);
+            throw new AppError("product not found", 404);
         }
     }
 
@@ -27,13 +27,13 @@ export class ProductServices implements IProductService<Products>{
      * @function getProductById
      * @param {string} productId - The ID of the product to retrieve.
      * @returns {Promise<Products>} A promise that resolves to the product object.
-     * @throws {CustomError} If the product is not found.
+     * @throws {AppError} If the product is not found.
      */
     public async getProductById(productId: string): Promise<Products> {
         try {
             const product: Products | null = await ProductModel.findById(productId);
             if (!product) {
-                throw new CustomError("product not Found", 404);
+                throw new AppError("product not Found", 404);
             }
             return product;
         } catch (error) {
@@ -67,14 +67,14 @@ export class ProductServices implements IProductService<Products>{
      * @param {string} productId - The ID of the product to update.
      * @param {Products} updateData - The data to update the product with.
      * @returns {Promise<boolean>} A promise that resolves to true if the update is successful.
-     * @throws {CustomError} If the product is not found.
+     * @throws {AppError} If the product is not found.
      * @throws {Error} If any error occurs during the update process.
      */
     public async updateOneProductById(productId: string, updateData: Products): Promise<boolean> {
         try {
             const product: Products | null = await ProductModel.findByIdAndUpdate(productId, updateData, { new: true });
             if (!product) {
-                throw new CustomError("product not Found", 404);
+                throw new AppError("product not Found", 404);
             }
             return true;
         } catch (error) {
@@ -90,14 +90,14 @@ export class ProductServices implements IProductService<Products>{
      * @param {string} productId - The ID of the products to update.
      * @param {Products} updateData - The data to update the products with.
      * @returns {Promise<boolean>} A promise that resolves to true if the update is successful.
-     * @throws {CustomError} If the product is not found or no changes are made.
+     * @throws {AppError} If the product is not found or no changes are made.
      * @throws {Error} If any error occurs during the update process.
      */
     public async updateManyProductById(productId: string, updateData: Products): Promise<boolean> {
         try {
             const productUpdate = await ProductModel.updateOne({ _id: productId }, { $set: updateData });
             if (productUpdate.modifiedCount === 0) {
-                throw new CustomError("Product has no changes made | Product not found", 404);
+                throw new AppError("Product has no changes made | Product not found", 404);
             }
             return true;
         } catch (error) {
@@ -112,14 +112,14 @@ export class ProductServices implements IProductService<Products>{
      * @function deleteProductById
      * @param {string} productId - The ID of the product to delete.
      * @returns {Promise<boolean>} A promise that resolves to true if the deletion is successful.
-     * @throws {CustomError} If the product is not found.
+     * @throws {AppError} If the product is not found.
      * @throws {Error} If any error occurs during the deletion process.
      */
     public async deleteProductById(productId: string): Promise<boolean> {
         try {
             const productDelete = await ProductModel.findByIdAndDelete(productId);
             if (!productDelete) {
-                throw new CustomError('product not found', 404);
+                throw new AppError('product not found', 404);
             }
             return true;
         } catch (error) {

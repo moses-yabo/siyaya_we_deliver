@@ -1,6 +1,6 @@
 import {TrailerBooking } from "../types/trailerTypes";
 import RentalModel from "../models/RentalSchema";
-import { CustomError } from "../utils/CustomErrorHandling";
+import { AppError } from "../utils/AppErrorHandling";
 import { IRentalService } from "../types/IRentalService";
 
 export class RentalServices implements IRentalService<TrailerBooking>{
@@ -12,14 +12,14 @@ export class RentalServices implements IRentalService<TrailerBooking>{
      * @async
      * @function getAllRentals
      * @returns {Promise<TrailerBooking[]>} A promise that resolves to an array of rental objects.
-     * @throws {CustomError} If no rentals are found.
+     * @throws {AppError} If no rentals are found.
      */
     public async getAllRentals(): Promise<TrailerBooking[]> {
         try {
             const products: TrailerBooking[] = await RentalModel.find({});
             return products;
         } catch (error) {
-            throw new CustomError("rental not found", 404);
+            throw new AppError("rental not found", 404);
         }
     }
 
@@ -30,13 +30,13 @@ export class RentalServices implements IRentalService<TrailerBooking>{
      * @function getRentalById
      * @param {string} rentalId - The ID of the rental to retrieve.
      * @returns {Promise<TrailerBooking>} A promise that resolves to the rental object.
-     * @throws {CustomError} If the rental is not found.
+     * @throws {AppError} If the rental is not found.
      */
     public async getRentalById(rentalId: string): Promise<TrailerBooking> {
         try {
             const rental: TrailerBooking | null = await RentalModel.findById(rentalId);
             if (!rental) {
-                throw new CustomError("rental not Found", 404);
+                throw new AppError("rental not Found", 404);
             }
             return rental;
         } catch (error) {
@@ -70,14 +70,14 @@ export class RentalServices implements IRentalService<TrailerBooking>{
      * @param {string} rentalId - The ID of the rental to update.
      * @param {TrailerBooking} updateData - The data to update the rental with.
      * @returns {Promise<boolean>} A promise that resolves to true if the update is successful.
-     * @throws {CustomError} If the rental is not found.
+     * @throws {AppError} If the rental is not found.
      * @throws {Error} If any error occurs during the update process.
      */
     public async updateOneRentalById(rentalId: string, updateData: TrailerBooking): Promise<boolean> {
         try {
             const rentalUpdate = await RentalModel.findByIdAndUpdate(rentalId, updateData, { new: true });
             if (!rentalUpdate) {
-                throw new CustomError("Rental not found", 404);
+                throw new AppError("Rental not found", 404);
             }
             return true;
         } catch (error) {
@@ -93,14 +93,14 @@ export class RentalServices implements IRentalService<TrailerBooking>{
      * @param {string} rentalId - The ID of the rentals to update.
      * @param {TrailerBooking} updateData - The data to update the rentals with.
      * @returns {Promise<boolean>} A promise that resolves to true if the update is successful.
-     * @throws {CustomError} If the rental is not found or no changes are made.
+     * @throws {AppError} If the rental is not found or no changes are made.
      * @throws {Error} If any error occurs during the update process.
      */
     public async updateManyRentalById(rentalId: string, updateData: TrailerBooking): Promise<boolean> {
         try {
             const rentalUpdate = await RentalModel.updateOne({ _id: rentalId }, { $set: updateData });
             if (rentalUpdate.modifiedCount === 0) {
-                throw new CustomError("rental not found | rental has no changes made", 404);
+                throw new AppError("rental not found | rental has no changes made", 404);
             }
             return true;
         } catch (error) {
@@ -116,14 +116,14 @@ export class RentalServices implements IRentalService<TrailerBooking>{
      * @function deleteRentalById
      * @param {string} rentalId - The ID of the rental to delete.
      * @returns {Promise<boolean>} A promise that resolves to true if the deletion is successful.
-     * @throws {CustomError} If the rental is not found.
+     * @throws {AppError} If the rental is not found.
      * @throws {Error} If any error occurs during the deletion process.
      */
     public async deleteRentalById(rentalId: string): Promise<boolean> {
         try {
             const rentalDelete = await RentalModel.findByIdAndDelete(rentalId);
             if (!rentalDelete) {
-                throw new CustomError('rental not found', 404);
+                throw new AppError('rental not found', 404);
             }
             return true;
         } catch (error) {

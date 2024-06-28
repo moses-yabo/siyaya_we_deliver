@@ -7,6 +7,7 @@ const express_1 = __importDefault(require("express"));
 const dotenv_1 = require("dotenv");
 const middlewareConfig_1 = require("./middlewares/middlewareConfig");
 const DbContext_1 = __importDefault(require("./Db/DbContext"));
+const logger_1 = require("./utils/logger");
 class ServerEntryPoint {
     constructor() {
         (0, dotenv_1.config)();
@@ -19,7 +20,7 @@ class ServerEntryPoint {
         new middlewareConfig_1.QuanterMiddlewares(this.app, this.port);
     }
     start() {
-        this.app.listen(this.port, () => console.log(`Welcome Server is Listening on ${this.port}`));
+        this.app.listen(this.port, () => logger_1.logger.info(`Welcome Server is Listening on ${this.port}`));
     }
 }
 const server = new ServerEntryPoint();

@@ -2,7 +2,7 @@ import express from "express";
 import {config} from "dotenv";
 import { QuanterMiddlewares } from "./middlewares/middlewareConfig";
 import DbContext from "./Db/DbContext";
-
+import { logger } from "./utils/logger";
 class ServerEntryPoint {
   private app: express.Application;
   private port: number | string;
@@ -22,7 +22,7 @@ class ServerEntryPoint {
     new QuanterMiddlewares(this.app,<number>this.port);
 }
 public start():void{
-this.app.listen(this.port,()=> console.log(`Welcome Server is Listening on ${this.port}`));
+ this.app.listen(this.port,()=> logger.info(`Welcome Server is Listening on ${this.port}`));
 }
 
 }

@@ -14,7 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ShippingServices = void 0;
 const ShippingSchema_1 = __importDefault(require("../models/ShippingSchema"));
-const CustomErrorHandling_1 = require("../utils/CustomErrorHandling");
+const AppErrorHandling_1 = require("../utils/AppErrorHandling");
 class ShippingServices {
     /**
  * Retrieves all shippings from the database.
@@ -22,7 +22,7 @@ class ShippingServices {
  * @async
  * @function getAllShippings
  * @returns {Promise<shipping_Type[]>} A promise that resolves to an array of shipping objects.
- * @throws {CustomError} If no shippings are found.
+ * @throws {AppError} If no shippings are found.
  */
     getAllShippings() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -31,7 +31,7 @@ class ShippingServices {
                 return shipping;
             }
             catch (error) {
-                throw new CustomErrorHandling_1.CustomError("shipping not found", 404);
+                throw new AppErrorHandling_1.AppError("shipping not found", 404);
             }
         });
     }
@@ -42,14 +42,14 @@ class ShippingServices {
      * @function getShippingById
      * @param {string} shippingId - The ID of the shipping to retrieve.
      * @returns {Promise<shipping_Type>} A promise that resolves to the shipping object.
-     * @throws {CustomError} If the shipping is not found.
+     * @throws {AppError} If the shipping is not found.
      */
     getShippingById(shippingId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const shipping = yield ShippingSchema_1.default.findById(shippingId);
                 if (!shipping) {
-                    throw new CustomErrorHandling_1.CustomError("shipping not Found", 404);
+                    throw new AppErrorHandling_1.AppError("shipping not Found", 404);
                 }
                 return shipping;
             }
@@ -86,7 +86,7 @@ class ShippingServices {
      * @param {string} shippingId - The ID of the shipping to update.
      * @param {shipping_Type} updateData - The data to update the shipping with.
      * @returns {Promise<boolean>} A promise that resolves to true if the update is successful.
-     * @throws {CustomError} If the shipping is not found.
+     * @throws {AppError} If the shipping is not found.
      * @throws {Error} If any error occurs during the update process.
      */
     updateOneShippingById(shippingId, updateData) {
@@ -94,7 +94,7 @@ class ShippingServices {
             try {
                 const shippingUpdate = yield ShippingSchema_1.default.findByIdAndUpdate(shippingId, updateData, { new: true });
                 if (!shippingUpdate) {
-                    throw new CustomErrorHandling_1.CustomError("Shipping not found", 404);
+                    throw new AppErrorHandling_1.AppError("Shipping not found", 404);
                 }
                 return true;
             }
@@ -111,7 +111,7 @@ class ShippingServices {
      * @param {string} shippingId - The ID of the shippings to update.
      * @param {shipping_Type} updateData - The data to update the shippings with.
      * @returns {Promise<boolean>} A promise that resolves to true if the update is successful.
-     * @throws {CustomError} If the shipping is not found or no changes are made.
+     * @throws {AppError} If the shipping is not found or no changes are made.
      * @throws {Error} If any error occurs during the update process.
      */
     updateManyShippingById(shippingId, updateData) {
@@ -119,7 +119,7 @@ class ShippingServices {
             try {
                 const shippingUpdate = yield ShippingSchema_1.default.updateOne({ _id: shippingId }, { $set: updateData });
                 if (shippingUpdate.modifiedCount === 0) {
-                    throw new CustomErrorHandling_1.CustomError("Shipping not found | has no changes made", 404);
+                    throw new AppErrorHandling_1.AppError("Shipping not found | has no changes made", 404);
                 }
                 return true;
             }
@@ -136,7 +136,7 @@ class ShippingServices {
      * @function deleteShippingById
      * @param {string} shippingId - The ID of the shipping to delete.
      * @returns {Promise<boolean>} A promise that resolves to true if the deletion is successful.
-     * @throws {CustomError} If the shipping is not found.
+     * @throws {AppError} If the shipping is not found.
      * @throws {Error} If any error occurs during the deletion process.
      */
     deleteShippingById(shippingId) {
@@ -144,7 +144,7 @@ class ShippingServices {
             try {
                 const shippingDelete = yield ShippingSchema_1.default.findByIdAndDelete(shippingId);
                 if (!shippingDelete) {
-                    throw new CustomErrorHandling_1.CustomError('shipping not found', 404);
+                    throw new AppErrorHandling_1.AppError('shipping not found', 404);
                 }
                 return true;
             }

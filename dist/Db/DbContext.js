@@ -13,16 +13,26 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
+const logger_1 = require("../utils/logger");
 exports.default = () => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
     const Db_URL = (_a = process.env) === null || _a === void 0 ? void 0 : _a.DB_URL;
     const DB_PASSWORD = (_b = process.env) === null || _b === void 0 ? void 0 : _b.DB_PASSWORD;
-    mongoose_1.default.set('strictQuery', false);
-    yield mongoose_1.default.connect(Db_URL.replace("<password>", DB_PASSWORD))
-        .then(() => {
-        console.log("DB Connected");
-    })
-        .catch((err) => {
-        console.log(err.message);
-    });
+    try {
+        mongoose_1.default.set('strictQuery', false);
+        yield mongoose_1.default.connect(Db_URL.replace("<password>", DB_PASSWORD));
+        logger_1.logger.info("DB Connected");
+        mongoose_1.default.connection.on("error", (error) => {
+            logger_1.logger.error(`${error.message}`);
+        });
+        mongoose_1.default.connection.on("disconnect", () => {
+            logger_1.logger.info("DB is disconnected ");
+        });
+    }
+    catch (error) {
+        logger_1.logger.error(` {
+    message:${error === null || error === void 0 ? void 0 : error.message},
+    name: ${error === null || error === void 0 ? void 0 : error.name}
+    }`);
+    }
 });

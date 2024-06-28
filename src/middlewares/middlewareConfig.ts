@@ -2,6 +2,7 @@ import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import swaggerDocumentation from '../openApi.json';
 import swaggerUI from "swagger-ui-express";
+import { logger } from "../utils/logger";
 import bookingRouter from "../routes/bookTaxiRoutes";
 import shippRouter from "../routes/ShippingRoutes";
 import rentalRouter from "../routes/rentTrailerRoutes";
@@ -9,6 +10,8 @@ import taxiRouter from "../routes/TaxiRoutes";
 import userRouter from "../routes/UserRoutes";
 import productRouter from "../routes/ProductsRoutes";
 import trailerRouter from "../routes/TrailersRoutes";
+import { errorHandler } from "./errorHandler";
+import { NotFoundErrorHandler } from "./notFoundHandler";
 
 
 export class QuanterMiddlewares {
@@ -35,9 +38,10 @@ export class QuanterMiddlewares {
             res.send(swaggerDocumentation);
           });
         }
+
         this.app.use(express.urlencoded({ extended: false }));
         this.app.use(express.json());
-        this.app.use(cors());
+        this.app.use(cors({origin:"*"}));
         this.app.use("/api/books",bookingRouter);
         this.app.use("/api/shipp",shippRouter);
         this.app.use("/api/rent",rentalRouter);
@@ -45,21 +49,14 @@ export class QuanterMiddlewares {
         this.app.use("/api/users",userRouter);
         this.app.use("/api/trailer",trailerRouter);
         this.app.use("/api/product",productRouter);
+        this.app.use(NotFoundErrorHandler);
+        this.app.use(errorHandler);
+        
       };
 
       private getRequestTime = (req: Request, res: Response, next: NextFunction):void => {
-        console.log(`Received a ${req.method} Http method at ${ new Date().toISOString()}`);
+        logger.info(`Received a ${req.method} Http method from ${req.url} at ${ new Date().toISOString()}`);
         next();
       };
 
-      
-      private errorNotification = ()=>{
-        
-        return (err:Error ,str:string,req: Request) => {
-                  
-          const title = `Error in ${req.method} ${req.url}`;
-    
-};
-      }
-    
 }

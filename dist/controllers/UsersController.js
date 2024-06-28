@@ -13,21 +13,31 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.userController = void 0;
+const mongoose_1 = __importDefault(require("mongoose"));
+const logger_1 = require("../utils/logger");
+const user_service_1 = require("../services/user.service");
 const UserSchema_1 = __importDefault(require("../models/UserSchema"));
 const responseMiddleware_1 = require("../middlewares/responseMiddleware");
-const CustomErrorHandling_1 = require("../utils/CustomErrorHandling");
-const mongoose_1 = __importDefault(require("mongoose"));
+const AppErrorHandling_1 = require("../utils/AppErrorHandling");
+const resourceNotFound_1 = require("../utils/resourceNotFound");
 class UserController {
     constructor() {
+        this._userServices = new user_service_1.UserServices();
+        this.USERS = "Users";
         this.get_all_available_users = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const users = yield UserSchema_1.default.find({});
-                if (users.length === 0)
-                    return (0, responseMiddleware_1.sendResponse)(res, 404, "Users Not Found!");
+                const users = yield this._userServices.getAllUsers();
+                if (users.length === 0) {
+                    logger_1.logger.error("Users Not Found!");
+                    return (0, resourceNotFound_1.resourceNotFound)(this.USERS);
+                }
+                ;
+                logger_1.logger.info("Fetched users");
                 (0, responseMiddleware_1.sendResponse)(res, 200, "success !!", users);
             }
             catch (error) {
-                if (error instanceof CustomErrorHandling_1.CustomError) {
+                if (error instanceof AppErrorHandling_1.AppError) {
+                    logger_1.logger.error(error.message);
                     (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
                 }
             }
@@ -36,12 +46,17 @@ class UserController {
             try {
                 const user_id = req.params["user_id"];
                 const user = yield UserSchema_1.default.findById(user_id);
-                if (!user)
-                    return (0, responseMiddleware_1.sendResponse)(res, 404, "user not found", user);
+                if (!user) {
+                    logger_1.logger.error("user not found");
+                    return (0, resourceNotFound_1.resourceNotFound)(this.USERS);
+                }
+                ;
+                logger_1.logger.info("Fetched a user");
                 (0, responseMiddleware_1.sendResponse)(res, 200, "success", user);
             }
             catch (error) {
-                if (error instanceof CustomErrorHandling_1.CustomError) {
+                if (error instanceof AppErrorHandling_1.AppError) {
+                    logger_1.logger.error(error.message);
                     (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
                 }
             }
@@ -50,19 +65,26 @@ class UserController {
             try {
                 const { email } = req.body;
                 const user_email = yield UserSchema_1.default.find({ email: email });
-                if (user_email.length > 0)
+                if (user_email.length > 0) {
+                    logger_1.logger.error("user email has already been registered as a user");
                     return (0, responseMiddleware_1.sendResponse)(res, 409, "user email has already been registered as a user");
+                }
+                ;
                 const user = yield UserSchema_1.default.create(req.body);
-                return (0, responseMiddleware_1.sendResponse)(res, 200, "Created a user", user);
+                logger_1.logger.info("Created a user");
+                return (0, responseMiddleware_1.sendResponse)(res, 201, "Created a user", user);
             }
             catch (error) {
                 if (error instanceof mongoose_1.default.Error.ValidationError) {
+                    logger_1.logger.error(error.message);
                     return (0, responseMiddleware_1.sendResponse)(res, 400, error.message);
                 }
-                else if (error instanceof CustomErrorHandling_1.CustomError) {
+                else if (error instanceof AppErrorHandling_1.AppError) {
+                    logger_1.logger.error(error.message);
                     return (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
                 }
                 ;
+                logger_1.logger.error("Failed to create a user");
                 return (0, responseMiddleware_1.sendResponse)(res, 500, "Failed to create a user");
             }
         });
@@ -71,13 +93,16 @@ class UserController {
                 const user_id = req.params["user_id"];
                 const user = yield UserSchema_1.default.findOneAndUpdate({ _id: user_id }, { $set: req.body }, { new: true });
                 if (!user) {
-                    (0, responseMiddleware_1.sendResponse)(res, 404, "user not found!");
+                    logger_1.logger.error("user not found!");
+                    (0, resourceNotFound_1.resourceNotFound)(this.USERS);
                     return;
                 }
+                logger_1.logger.info("Update a user");
                 (0, responseMiddleware_1.sendResponse)(res, 200, "Success!", user);
             }
             catch (error) {
-                if (error instanceof CustomErrorHandling_1.CustomError) {
+                if (error instanceof AppErrorHandling_1.AppError) {
+                    logger_1.logger.error(error.message);
                     (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
                 }
             }
@@ -87,13 +112,16 @@ class UserController {
                 const user_id = req.params["user_id"];
                 const user = yield UserSchema_1.default.updateOne({ _id: user_id }, { $set: req.body });
                 if (user.modifiedCount === 0) {
-                    (0, responseMiddleware_1.sendResponse)(res, 404, "User not found. Updating users failed.");
+                    logger_1.logger.error("User not found. Updating users failed.");
+                    (0, resourceNotFound_1.resourceNotFound)(this.USERS);
                     return;
                 }
+                logger_1.logger.info("Updated a user");
                 (0, responseMiddleware_1.sendResponse)(res, 200, "success! user is updated", user);
             }
             catch (error) {
-                if (error instanceof CustomErrorHandling_1.CustomError) {
+                if (error instanceof AppErrorHandling_1.AppError) {
+                    logger_1.logger.error(error.message);
                     (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
                 }
             }
@@ -103,13 +131,16 @@ class UserController {
                 const user_id = req.params["user_id"];
                 const user = yield UserSchema_1.default.deleteOne({ _id: user_id });
                 if (user.deletedCount === 0) {
-                    (0, responseMiddleware_1.sendResponse)(res, 404, "User not found");
+                    logger_1.logger.error("User not found");
+                    (0, resourceNotFound_1.resourceNotFound)(this.USERS);
                     return;
                 }
-                (0, responseMiddleware_1.sendResponse)(res, 204, "success in deletion of a doc!", user);
+                logger_1.logger.info("success in deletion of a user doc!");
+                (0, responseMiddleware_1.sendResponse)(res, 204, "success in deletion of a user doc!", user);
             }
             catch (error) {
-                if (error instanceof CustomErrorHandling_1.CustomError) {
+                if (error instanceof AppErrorHandling_1.AppError) {
+                    logger_1.logger.error(error.message);
                     (0, responseMiddleware_1.sendResponse)(res, error.statusCode, error.message);
                 }
             }

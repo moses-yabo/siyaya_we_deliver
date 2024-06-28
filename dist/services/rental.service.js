@@ -14,7 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RentalServices = void 0;
 const RentalSchema_1 = __importDefault(require("../models/RentalSchema"));
-const CustomErrorHandling_1 = require("../utils/CustomErrorHandling");
+const AppErrorHandling_1 = require("../utils/AppErrorHandling");
 class RentalServices {
     /**
      * Retrieves all rentals from the database.
@@ -22,7 +22,7 @@ class RentalServices {
      * @async
      * @function getAllRentals
      * @returns {Promise<TrailerBooking[]>} A promise that resolves to an array of rental objects.
-     * @throws {CustomError} If no rentals are found.
+     * @throws {AppError} If no rentals are found.
      */
     getAllRentals() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -31,7 +31,7 @@ class RentalServices {
                 return products;
             }
             catch (error) {
-                throw new CustomErrorHandling_1.CustomError("rental not found", 404);
+                throw new AppErrorHandling_1.AppError("rental not found", 404);
             }
         });
     }
@@ -42,14 +42,14 @@ class RentalServices {
      * @function getRentalById
      * @param {string} rentalId - The ID of the rental to retrieve.
      * @returns {Promise<TrailerBooking>} A promise that resolves to the rental object.
-     * @throws {CustomError} If the rental is not found.
+     * @throws {AppError} If the rental is not found.
      */
     getRentalById(rentalId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const rental = yield RentalSchema_1.default.findById(rentalId);
                 if (!rental) {
-                    throw new CustomErrorHandling_1.CustomError("rental not Found", 404);
+                    throw new AppErrorHandling_1.AppError("rental not Found", 404);
                 }
                 return rental;
             }
@@ -86,7 +86,7 @@ class RentalServices {
      * @param {string} rentalId - The ID of the rental to update.
      * @param {TrailerBooking} updateData - The data to update the rental with.
      * @returns {Promise<boolean>} A promise that resolves to true if the update is successful.
-     * @throws {CustomError} If the rental is not found.
+     * @throws {AppError} If the rental is not found.
      * @throws {Error} If any error occurs during the update process.
      */
     updateOneRentalById(rentalId, updateData) {
@@ -94,7 +94,7 @@ class RentalServices {
             try {
                 const rentalUpdate = yield RentalSchema_1.default.findByIdAndUpdate(rentalId, updateData, { new: true });
                 if (!rentalUpdate) {
-                    throw new CustomErrorHandling_1.CustomError("Rental not found", 404);
+                    throw new AppErrorHandling_1.AppError("Rental not found", 404);
                 }
                 return true;
             }
@@ -111,7 +111,7 @@ class RentalServices {
      * @param {string} rentalId - The ID of the rentals to update.
      * @param {TrailerBooking} updateData - The data to update the rentals with.
      * @returns {Promise<boolean>} A promise that resolves to true if the update is successful.
-     * @throws {CustomError} If the rental is not found or no changes are made.
+     * @throws {AppError} If the rental is not found or no changes are made.
      * @throws {Error} If any error occurs during the update process.
      */
     updateManyRentalById(rentalId, updateData) {
@@ -119,7 +119,7 @@ class RentalServices {
             try {
                 const rentalUpdate = yield RentalSchema_1.default.updateOne({ _id: rentalId }, { $set: updateData });
                 if (rentalUpdate.modifiedCount === 0) {
-                    throw new CustomErrorHandling_1.CustomError("rental not found | rental has no changes made", 404);
+                    throw new AppErrorHandling_1.AppError("rental not found | rental has no changes made", 404);
                 }
                 return true;
             }
@@ -136,7 +136,7 @@ class RentalServices {
      * @function deleteRentalById
      * @param {string} rentalId - The ID of the rental to delete.
      * @returns {Promise<boolean>} A promise that resolves to true if the deletion is successful.
-     * @throws {CustomError} If the rental is not found.
+     * @throws {AppError} If the rental is not found.
      * @throws {Error} If any error occurs during the deletion process.
      */
     deleteRentalById(rentalId) {
@@ -144,7 +144,7 @@ class RentalServices {
             try {
                 const rentalDelete = yield RentalSchema_1.default.findByIdAndDelete(rentalId);
                 if (!rentalDelete) {
-                    throw new CustomErrorHandling_1.CustomError('rental not found', 404);
+                    throw new AppErrorHandling_1.AppError('rental not found', 404);
                 }
                 return true;
             }
