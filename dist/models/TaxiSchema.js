@@ -26,7 +26,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const TaxiSchema = new mongoose_1.Schema({
     imgUrl: {
-        type: mongoose_1.default.Schema.Types.Buffer,
+        type: mongoose_1.default.Schema.Types.Buffer, // Assuming imgUrl can be Buffer or String
         minlength: 3,
         maxlength: 250,
         required: [false, "Image of the taxi"]
