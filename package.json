@@ -5,8 +5,8 @@
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
-    "build": "tsc -w",
-    "start": "nodemon ./dist/app.js -w"
+    "build": "tsc",
+    "start": "node ./dist/app.js"
   },
   "author": "Yabo Lindile",
   "license": "ISC",
