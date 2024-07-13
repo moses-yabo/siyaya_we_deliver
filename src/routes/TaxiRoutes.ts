@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { taxiController } from "../controllers/TaxiController";
+import  {taxiController}  from "../controllers/TaxiController";
 import { validateObjectId } from "../middlewares/validationMiddleware";
 
 
